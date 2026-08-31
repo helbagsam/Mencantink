@@ -104,7 +104,7 @@ export const CartView: React.FC<CartViewProps> = ({
                           </h3>
                           {item.artisanName && (
                             <p className="text-xs text-[#735c00] font-semibold mt-0.5">
-                              Artisan: {item.artisanName} {item.region ? `(${item.region})` : ''}
+                              Pengrajin: {item.artisanName} {item.region ? `(${item.region})` : ''}
                             </p>
                           )}
                         </div>
@@ -119,7 +119,7 @@ export const CartView: React.FC<CartViewProps> = ({
 
                       <div className="flex flex-wrap gap-2 mt-2">
                         <span className="bg-[#efeeea] px-3 py-0.5 rounded-full text-xs font-semibold text-[#000666] border border-[#000666]/20">
-                          {item.technique === 'Tulis' ? 'Tulis / Hand-drawn' : item.technique}
+                          {item.technique === 'Tulis' ? 'Batik Tulis' : item.technique}
                         </span>
                         <span className="bg-[#ffffff] px-3 py-0.5 rounded-full text-xs font-medium text-[#735c00] border border-[#735c00]/30 italic">
                           {item.fabricType}
@@ -162,7 +162,7 @@ export const CartView: React.FC<CartViewProps> = ({
               </div>
             ))}
 
-            {/* Cultural Heritage Notes Box */}
+            {/* Catatan Warisan Budaya Box */}
             <div className="p-6 md:p-8 border border-[#cba72f] bg-[#fbf9f5] rounded-xl relative overflow-hidden">
               <div className="flex items-start gap-4">
                 <div className="p-2.5 bg-[#ffe088]/40 rounded-full text-[#735c00] shrink-0">
@@ -170,7 +170,7 @@ export const CartView: React.FC<CartViewProps> = ({
                 </div>
                 <div>
                   <h4 className="font-serif-garamond text-xl font-bold text-[#735c00] mb-2 italic">
-                    Catatan Warisan Budaya — <span className="not-italic text-sm text-[#1b1c1a]">Cultural Heritage Notes</span>
+                    Catatan Warisan Budaya — <span className="not-italic text-sm text-[#1b1c1a]">Catatan Warisan Budaya</span>
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-[#454652] leading-relaxed">
                     <p>
@@ -189,7 +189,7 @@ export const CartView: React.FC<CartViewProps> = ({
           <aside className="lg:col-span-4 space-y-6">
             <div className="bg-[#eae8e4] p-6 md:p-8 rounded-xl border border-[#767683]/30 shadow-sm sticky top-28">
               <h2 className="font-serif-garamond text-2xl font-bold text-[#000666] mb-6 border-b border-[#767683]/20 pb-4">
-                Ringkasan Pesanan / <span className="text-base opacity-70">Order Summary</span>
+                Ringkasan Pesanan / <span className="text-base opacity-70">Ringkasan Pesanan</span>
               </h2>
 
               <div className="space-y-4 mb-6 text-sm">

@@ -222,7 +222,7 @@ export const OrderTrackingView: React.FC<OrderTrackingViewProps> = ({
 
           {/* Order Summary Mini */}
           <div className="bg-white p-6 rounded-xl border border-[#767683]/20 space-y-3 text-xs">
-            <h4 className="font-bold text-[#767683] uppercase tracking-widest text-[10px]">Order Summary</h4>
+            <h4 className="font-bold text-[#767683] uppercase tracking-widest text-[10px]">Ringkasan Pesanan</h4>
             <div className="flex justify-between">
               <span className="text-[#454652]">Subtotal</span>
               <span className="font-bold text-[#000666]">{formatPrice(activeOrder.subtotalIDR, currency)}</span>
