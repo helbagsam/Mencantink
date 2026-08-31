@@ -1,7 +1,19 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+
 import { NavTab, BatikMotif, ForumThread, ReviewItem, CartItem, Order, Currency } from './types';
-import { INITIAL_MOTIFS, MOCK_FORUM_THREADS } from './data/mockData';
-import { INITIAL_CART_ITEMS, INITIAL_ORDER_SAMPLE } from './data/cartMock';
+import { MOCK_FORUM_THREADS } from './data/mockData';
+import { ROUTES } from './routes';
+import {
+  getCart,
+  getMotifs,
+  getOrders,
+  saveCart,
+  saveMotifs,
+  saveOrders,
+} from './services/shopService';
+
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { MotifModal } from './components/MotifModal';
@@ -10,7 +22,6 @@ import { WriteReviewModal } from './components/WriteReviewModal';
 import { AuthModal } from './components/AuthModal';
 
 import { HomeView } from './views/HomeView';
-import { CatalogView } from './views/CatalogView';
 import { EducationView } from './views/EducationView';
 import { PasarNusantaraView } from './views/PasarNusantaraView';
 import { CartView } from './views/CartView';
@@ -21,35 +32,100 @@ import { OnboardingView } from './views/OnboardingView';
 import { CommunityView } from './views/CommunityView';
 import { HeritageView } from './views/HeritageView';
 import { ArtisansView } from './views/ArtisansView';
-import { CheckCircle2 } from 'lucide-react';
-import { IMG } from './assets/images';
+import { ArtisanProfileView } from './views/ArtisanProfileView';
+
+/**
+ * Jembatan dari penamaan tab lama ke alamat halaman.
+ *
+ * Sepuluh berkas tampilan masih memanggil onNavigateTab('catalog') dan
+ * sejenisnya. Daripada menyunting kesepuluhnya sekaligus — pekerjaan yang
+ * berisiko menjelang peragaan — nama tab lama dipetakan ke alamat baru di satu
+ * tempat ini. Tampilannya tidak perlu tahu bahwa aplikasi sekarang punya URL.
+ */
+const TAB_TO_ROUTE: Record<NavTab, string> = {
+  home: ROUTES.home,
+  education: ROUTES.learn,
+  catalog: ROUTES.learn,
+  marketplace: ROUTES.market,
+  heritage: ROUTES.heritage,
+  community: ROUTES.community,
+  artisans: ROUTES.artisans,
+  portal: ROUTES.portal,
+  onboarding: ROUTES.portalUpload,
+  cart: ROUTES.cart,
+  checkout: ROUTES.checkout,
+  tracking: ROUTES.orders,
+};
+
+/** Kembali ke atas setiap berpindah halaman. */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+  return null;
+}
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('home');
-  const [motifs, setMotifs] = useState<BatikMotif[]>(INITIAL_MOTIFS);
+  const navigate = useNavigate();
+
+  const [motifs, setMotifs] = useState<BatikMotif[]>([]);
   const [threads, setThreads] = useState<ForumThread[]>(MOCK_FORUM_THREADS);
 
-  // E-Commerce State
-  const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
-  const [orders, setOrders] = useState<Order[]>([INITIAL_ORDER_SAMPLE]);
-  const [activeOrder, setActiveOrder] = useState<Order | null>(INITIAL_ORDER_SAMPLE);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [currency, setCurrency] = useState<Currency>('IDR');
   const [discountIDR, setDiscountIDR] = useState<number>(0);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Toast Notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Modal States
   const [selectedMotifModal, setSelectedMotifModal] = useState<BatikMotif | null>(null);
   const [isStartDiscussionOpen, setIsStartDiscussionOpen] = useState(false);
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
+  /* Memuat data tersimpan sekali di awal. */
+  useEffect(() => {
+    (async () => {
+      const [storedMotifs, storedCart, storedOrders] = await Promise.all([
+        getMotifs(),
+        getCart(),
+        getOrders(),
+      ]);
+      setMotifs(storedMotifs);
+      setCartItems(storedCart);
+      setOrders(storedOrders);
+      setActiveOrder(storedOrders[0] ?? null);
+      setHydrated(true);
+    })();
+  }, []);
+
+  /* Menyimpan setiap kali berubah — tetapi tidak sebelum data awal selesai
+     dimuat, supaya keadaan kosong sesaat tidak menimpa data tersimpan. */
+  useEffect(() => {
+    if (hydrated) void saveCart(cartItems);
+  }, [cartItems, hydrated]);
+
+  useEffect(() => {
+    if (hydrated) void saveOrders(orders);
+  }, [orders, hydrated]);
+
+  useEffect(() => {
+    if (hydrated) void saveMotifs(motifs);
+  }, [motifs, hydrated]);
+
+  const goTab = useCallback(
+    (tab: NavTab) => {
+      navigate(TAB_TO_ROUTE[tab]);
+    },
+    [navigate],
+  );
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3000);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleAddToCart = (motif: BatikMotif) => {
@@ -68,23 +144,26 @@ export function App() {
       const existing = prev.find((item) => item.motifId === motif.id || item.name === motif.name);
       if (existing) {
         return prev.map((item) =>
-          item.id === existing.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === existing.id ? { ...item, quantity: item.quantity + 1 } : item,
         );
-      } else {
-        const newItem: CartItem = {
-          id: `cart-${Date.now()}`,
-          name: motif.name,
-          motifId: motif.id,
-          technique: motif.technique,
-          fabricType: 'Kain Sutra Halus Primissima',
-          priceIDR: priceIDR,
-          quantity: 1,
-          imageUrl: motif.imageUrl,
-          artisanName: 'Komunitas Pengrajin Batik',
-          region: motif.region,
-        };
-        return [...prev, newItem];
       }
+      const newItem: CartItem = {
+        id: `cart-${Date.now()}`,
+        name: motif.name,
+        motifId: motif.id,
+        technique: motif.technique,
+        fabricType: 'Kain Sutra Halus Primissima',
+        priceIDR,
+        quantity: 1,
+        imageUrl: motif.imageUrl,
+        // Nama pengrajin diambil dari motifnya, bukan diseragamkan menjadi
+        // "Komunitas Pengrajin Batik" seperti sebelumnya. Nama pembuat justru
+        // hal pertama yang dihapus pedagang white label — di sini tidak boleh
+        // hilang, apalagi oleh aplikasi kita sendiri.
+        artisanName: motif.artisanName ?? 'Pengrajin belum tercatat',
+        region: motif.region,
+      };
+      return [...prev, newItem];
     });
 
     showToast(`"${motif.name}" berhasil ditambahkan ke keranjang!`);
@@ -100,7 +179,7 @@ export function App() {
           }
           return item;
         })
-        .filter((item): item is CartItem => item !== null)
+        .filter((item): item is CartItem => item !== null),
     );
   };
 
@@ -114,8 +193,7 @@ export function App() {
     setActiveOrder(newOrder);
     setCartItems([]);
     setDiscountIDR(0);
-    setCurrentTab('tracking');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(ROUTES.orders);
     showToast(`Pembayaran Berhasil! Pesanan #${newOrder.id} sedang diproses.`);
   };
 
@@ -129,8 +207,11 @@ export function App() {
 
     setOrders((prev) =>
       prev.map((ord) => {
-        if (ord.id === orderId) {
-          const updatedTimeline = [
+        if (ord.id !== orderId) return ord;
+        const updatedOrder: Order = {
+          ...ord,
+          status: nextStatus,
+          timeline: [
             {
               id: `tl-${Date.now()}`,
               title: statusTitles[nextStatus].en,
@@ -141,19 +222,11 @@ export function App() {
               completed: true,
             },
             ...ord.timeline,
-          ];
-          const updatedOrder: Order = {
-            ...ord,
-            status: nextStatus,
-            timeline: updatedTimeline,
-          };
-          if (activeOrder && activeOrder.id === orderId) {
-            setActiveOrder(updatedOrder);
-          }
-          return updatedOrder;
-        }
-        return ord;
-      })
+          ],
+        };
+        if (activeOrder && activeOrder.id === orderId) setActiveOrder(updatedOrder);
+        return updatedOrder;
+      }),
     );
 
     showToast(`Status Pesanan #${orderId} diperbarui menjadi: ${nextStatus.toUpperCase()}`);
@@ -170,35 +243,33 @@ export function App() {
   const handleAddReply = (threadId: string, replyContent: string) => {
     setThreads((prev) =>
       prev.map((t) => {
-        if (t.id === threadId) {
-          const updatedReplies = [
+        if (t.id !== threadId) return t;
+        return {
+          ...t,
+          repliesCount: t.repliesCount + 1,
+          replies: [
             ...(t.replies || []),
             {
               id: `r-${Date.now()}`,
               authorName: 'Pengrajin Terverifikasi (Anda)',
-              authorAvatar: IMG['artisan_avatar'],
+              authorAvatar: t.authorAvatar,
               timeAgo: 'Baru saja',
               content: replyContent,
             },
-          ];
-          return {
-            ...t,
-            repliesCount: t.repliesCount + 1,
-            replies: updatedReplies,
-          };
-        }
-        return t;
-      })
+          ],
+        };
+      }),
     );
   };
 
-  const handleAddReview = (newReview: ReviewItem) => {
+  const handleAddReview = (_newReview: ReviewItem) => {
     showToast('Ulasan Anda berhasil dikirim!');
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbf9f5] text-[#1b1c1a] font-sans">
-      {/* Toast Notification Popup */}
+      <ScrollToTop />
+
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#000666] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in border border-[#ffe088]/40">
           <CheckCircle2 className="w-5 h-5 text-[#ffe088]" />
@@ -206,153 +277,127 @@ export function App() {
         </div>
       )}
 
-      {/* Shared Navigation Header */}
       <Navigation
-        currentTab={currentTab}
-        onTabChange={(tab) => {
-          setCurrentTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
         onOpenAuth={() => setIsAuthOpen(true)}
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         currency={currency}
-        onCurrencyChange={(c) => setCurrency(c)}
+        onCurrencyChange={setCurrency}
       />
 
-      {/* Main View Router */}
       <div className="flex-1">
-        {currentTab === 'home' && (
-          <HomeView
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        )}
+        <Routes>
+          <Route path={ROUTES.home} element={<HomeView onNavigateTab={goTab} />} />
 
-        {(currentTab === 'education' || currentTab === 'catalog') && (
-          <EducationView
-            motifs={motifs}
-            onSelectMotif={(motif) => setSelectedMotifModal(motif)}
-            onAddToCart={handleAddToCart}
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+          <Route
+            path={ROUTES.learn}
+            element={
+              <EducationView
+                motifs={motifs}
+                onSelectMotif={setSelectedMotifModal}
+                onAddToCart={handleAddToCart}
+                onNavigateTab={goTab}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'marketplace' && (
-          <PasarNusantaraView
-            motifs={motifs}
-            currency={currency}
-            onAddToCart={handleAddToCart}
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onSelectMotifDetail={(motif) => setSelectedMotifModal(motif)}
-          />
-        )}
+          <Route path={ROUTES.heritage} element={<HeritageView onNavigateTab={goTab} />} />
 
-        {currentTab === 'cart' && (
-          <CartView
-            items={cartItems}
-            currency={currency}
-            onUpdateQuantity={handleUpdateCartQuantity}
-            onRemoveItem={handleRemoveCartItem}
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            discountIDR={discountIDR}
-            onApplyDiscount={(disc) => setDiscountIDR(disc)}
+          <Route
+            path={ROUTES.market}
+            element={
+              <PasarNusantaraView
+                motifs={motifs}
+                currency={currency}
+                onAddToCart={handleAddToCart}
+                onNavigateTab={goTab}
+                onSelectMotifDetail={setSelectedMotifModal}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'checkout' && (
-          <CheckoutView
-            items={cartItems}
-            currency={currency}
-            discountIDR={discountIDR}
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onCompleteCheckout={handleCompleteCheckout}
-          />
-        )}
+          <Route path={ROUTES.artisans} element={<ArtisansView />} />
+          <Route path="/pengrajin/:slug" element={<ArtisanProfileView />} />
 
-        {currentTab === 'tracking' && (
-          <OrderTrackingView
-            activeOrder={activeOrder}
-            currency={currency}
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
+          <Route
+            path={ROUTES.community}
+            element={
+              <CommunityView
+                threads={threads}
+                onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
+                onAddReply={handleAddReply}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'portal' && (
-          <DashboardView
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenWriteReview={() => setIsWriteReviewOpen(true)}
-            onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
-            orders={orders}
+          <Route
+            path={ROUTES.cart}
+            element={
+              <CartView
+                items={cartItems}
+                currency={currency}
+                onUpdateQuantity={handleUpdateCartQuantity}
+                onRemoveItem={handleRemoveCartItem}
+                onNavigateTab={goTab}
+                discountIDR={discountIDR}
+                onApplyDiscount={setDiscountIDR}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'onboarding' && (
-          <OnboardingView
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onAddProductToCatalog={handleAddProductToCatalog}
+          <Route
+            path={ROUTES.checkout}
+            element={
+              <CheckoutView
+                items={cartItems}
+                currency={currency}
+                discountIDR={discountIDR}
+                onNavigateTab={goTab}
+                onCompleteCheckout={handleCompleteCheckout}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'community' && (
-          <CommunityView
-            threads={threads}
-            onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
-            onAddReply={handleAddReply}
+          <Route
+            path={ROUTES.orders}
+            element={
+              <OrderTrackingView
+                activeOrder={activeOrder}
+                currency={currency}
+                onNavigateTab={goTab}
+                onUpdateOrderStatus={handleUpdateOrderStatus}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'heritage' && (
-          <HeritageView
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+          <Route
+            path={ROUTES.portal}
+            element={
+              <DashboardView
+                onNavigateTab={goTab}
+                onOpenWriteReview={() => setIsWriteReviewOpen(true)}
+                onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
+                orders={orders}
+              />
+            }
           />
-        )}
 
-        {currentTab === 'artisans' && (
-          <ArtisansView
-            onNavigateTab={(tab) => {
-              setCurrentTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+          <Route
+            path={ROUTES.portalUpload}
+            element={
+              <OnboardingView
+                onNavigateTab={goTab}
+                onAddProductToCatalog={handleAddProductToCatalog}
+              />
+            }
           />
-        )}
+
+          {/* Alamat tak dikenal dikembalikan ke beranda. */}
+          <Route path="*" element={<HomeView onNavigateTab={goTab} />} />
+        </Routes>
       </div>
 
-      {/* Shared Footer */}
-      <Footer
-        onTabChange={(tab) => {
-          setCurrentTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
+      <Footer onTabChange={goTab} />
 
-      {/* Modals & Overlays */}
       <MotifModal
         motif={selectedMotifModal}
         onClose={() => setSelectedMotifModal(null)}
@@ -372,10 +417,7 @@ export function App() {
         onSubmit={handleAddReview}
       />
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </div>
   );
 }
