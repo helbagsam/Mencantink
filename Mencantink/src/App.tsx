@@ -357,6 +357,7 @@ export function App() {
         motif={selectedMotifModal}
         onClose={() => setSelectedMotifModal(null)}
         onAddToCart={handleAddToCart}
+        currency={currency}
       />
 
       <StartDiscussionModal

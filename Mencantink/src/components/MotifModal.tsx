@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { BatikMotif } from '../types';
+import { BatikMotif, Currency } from '../types';
 import { X, Sparkles, MapPin, Tag, Landmark, Loader2, BookOpen } from 'lucide-react';
+import { ProofPanel } from './ProofPanel';
+import { HERITAGE_MOTIF_IDS, PRODUCT_ARTISAN_MAP } from '../data/trustSeed';
 
 interface MotifModalProps {
   motif: BatikMotif | null;
   onClose: () => void;
   onAddToCart?: (motif: BatikMotif) => void;
+  currency?: Currency;
 }
 
-export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToCart }) => {
+export const MotifModal: React.FC<MotifModalProps> = ({
+  motif,
+  onClose,
+  onAddToCart,
+  currency = 'IDR',
+}) => {
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
@@ -50,7 +58,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-[#fbf9f5] border border-[#767683]/20 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row"
+        className="bg-[#fbf9f5] border border-[#767683]/20 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -61,6 +69,9 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
         >
           <X className="w-5 h-5" />
         </button>
+
+        {/* Baris atas: gambar dan keterangan motif */}
+        <div className="flex flex-col md:flex-row">
 
         {/* Motif Image */}
         <div className="w-full md:w-1/2 min-h-[280px] bg-[#e4e2de] relative overflow-hidden flex items-center justify-center border-b md:border-b-0 md:border-r border-[#767683]/15">
@@ -173,6 +184,19 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
               Tutup
             </button>
           </div>
+        </div>
+        </div>
+
+        {/* Bukti Keaslian — inti pembeda produk ini, diberi lebar penuh karena
+            di sinilah pembeli menilai sendiri sebelum memutuskan membeli. */}
+        <div className="p-4 md:p-6 border-t border-[#767683]/15 bg-[#efeeea]/40">
+          <ProofPanel
+            productId={motif.id}
+            priceIDR={motif.priceIDR}
+            currency={currency}
+            isHeritageMotif={HERITAGE_MOTIF_IDS.has(motif.id)}
+            fallbackArtisanId={PRODUCT_ARTISAN_MAP[motif.id]}
+          />
         </div>
       </div>
     </div>

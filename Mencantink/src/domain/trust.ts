@@ -228,6 +228,12 @@ export interface ProofAsset {
   mimeType: string;
   capturedAt: string; // ISO 8601
   note?: string;
+  /**
+   * Menandai berkas contoh untuk keperluan demo, bukan bukti dari pengrajin
+   * sungguhan. Ditampilkan terbuka di antarmuka. Platform yang menyembunyikan
+   * mana yang contoh dan mana yang asli sudah kehilangan alasan keberadaannya.
+   */
+  placeholder?: boolean;
 }
 
 export type ProofPackStatus =
