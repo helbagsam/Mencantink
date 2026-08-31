@@ -43,11 +43,19 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
           >
             Pasar Nusantara
           </button>
-          <button 
-            onClick={() => onTabChange('heritage')} 
+          <button
+            onClick={() => onTabChange('heritage')}
             className="hover:text-white transition-colors hover:underline"
           >
             Warisan Budaya
+          </button>
+          {/* Halaman pengrajin sebelumnya tidak punya satu pun tautan menuju
+              ke sana, padahal pengrajin adalah subjek utama produk ini. */}
+          <button
+            onClick={() => onTabChange('artisans')}
+            className="hover:text-white transition-colors hover:underline"
+          >
+            Pengrajin
           </button>
           <button 
             onClick={() => onTabChange('community')} 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ForumThread } from '../types';
 import { X, MessageSquare, Send } from 'lucide-react';
+import { IMG } from '../assets/images';
 
 interface StartDiscussionModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export const StartDiscussionModal: React.FC<StartDiscussionModalProps> = ({
     const newThread: ForumThread = {
       id: `t-${Date.now()}`,
       authorName: authorName.trim() || 'Anonymous Artisan',
-      authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6GAZNx-92AGvmb5RF-2fC3Hqsre5AhVt_B88bMjkDziG2cemMFKUQ9wO_B7f2kzSmWx6tu9okfBEQFSPCTLprRLHSxMIga4e-qVt68jedfpkZNbwgdPoAqOVpx7uta6kXK5ttNKaG5VRmd-WQ-_uLnpkS120GloHY9vuSz0M3nSWMx5q6NUUkcALn1UMZrezFJVEQTPNAQXm7d_eTd4bLFc-dZnuNl8V_W2Bri-inNfrJQHBhvji-TA',
+      authorAvatar: IMG['artisan_avatar'],
       timeAgo: 'Just now',
       category,
       title: title.trim(),

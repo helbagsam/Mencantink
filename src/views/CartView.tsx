@@ -177,7 +177,7 @@ export const CartView: React.FC<CartViewProps> = ({
                       Setiap pembelian mahakarya ini merupakan kontribusi langsung bagi keberlangsungan hidup para perajin tradisional di Pekalongan, Solo, dan Yogyakarta. Anda turut menjaga napas teknik canting dan cap yang diakui UNESCO.
                     </p>
                     <p className="border-l border-[#767683]/20 pl-4 italic">
-                      Every purchase of these masterpieces directly contributes to the livelihood of traditional artisans. You help preserve the legacy of canting and stamp techniques recognized by UNESCO.
+                      Setiap pembelian di sini langsung sampai ke pengrajinnya, bukan ke pedagang perantara yang menempelkan mereknya sendiri. Rincian bagi hasilnya bisa Anda lihat terbuka di halaman tiap produk.
                     </p>
                   </div>
                 </div>

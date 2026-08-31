@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { BatikMotif } from '../types';
+import { BatikMotif, Currency } from '../types';
 import { X, Sparkles, MapPin, Tag, Landmark, Loader2, BookOpen } from 'lucide-react';
+import { ProofPanel } from './ProofPanel';
+import { HERITAGE_MOTIF_IDS, PRODUCT_ARTISAN_MAP } from '../data/trustSeed';
 
 interface MotifModalProps {
   motif: BatikMotif | null;
   onClose: () => void;
   onAddToCart?: (motif: BatikMotif) => void;
+  currency?: Currency;
 }
 
-export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToCart }) => {
+export const MotifModal: React.FC<MotifModalProps> = ({
+  motif,
+  onClose,
+  onAddToCart,
+  currency = 'IDR',
+}) => {
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
@@ -50,7 +58,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div 
-        className="bg-[#fbf9f5] border border-[#767683]/20 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row"
+        className="bg-[#fbf9f5] border border-[#767683]/20 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -61,6 +69,9 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
         >
           <X className="w-5 h-5" />
         </button>
+
+        {/* Baris atas: gambar dan keterangan motif */}
+        <div className="flex flex-col md:flex-row">
 
         {/* Motif Image */}
         <div className="w-full md:w-1/2 min-h-[280px] bg-[#e4e2de] relative overflow-hidden flex items-center justify-center border-b md:border-b-0 md:border-r border-[#767683]/15">
@@ -98,7 +109,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
             {/* Philosophy Box */}
             <div className="bg-[#f5f3ef] border border-[#767683]/15 rounded-lg p-4 space-y-1">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#000666] flex items-center gap-1">
-                <BookOpen className="w-3.5 h-3.5 text-[#a14000]" /> Cultural Philosophy
+                <BookOpen className="w-3.5 h-3.5 text-[#a14000]" /> Filosofi Motif
               </h4>
               <p className="text-xs text-[#1b1c1a] italic leading-relaxed">
                 "{motif.philosophy}"
@@ -109,7 +120,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
             {motif.originHistory && (
               <div className="space-y-1">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#767683] flex items-center gap-1">
-                  <Landmark className="w-3.5 h-3.5" /> Origin & Historical Record
+                  <Landmark className="w-3.5 h-3.5" /> Asal Usul & Catatan Sejarah
                 </h4>
                 <p className="text-xs text-[#454652]">
                   {motif.originHistory}
@@ -120,7 +131,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
             {/* Estimated Price */}
             {motif.priceEstimate && (
               <div className="pt-2 border-t border-[#767683]/15 flex justify-between items-center text-xs">
-                <span className="text-[#767683] uppercase tracking-wider">Estimated Gallery Valuation:</span>
+                <span className="text-[#767683] uppercase tracking-wider">Perkiraan Nilai Galeri:</span>
                 <span className="font-bold text-[#000666] font-serif-garamond text-sm">{motif.priceEstimate}</span>
               </div>
             )}
@@ -129,7 +140,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
             {aiInsight && (
               <div className="bg-[#e0e0ff]/40 border border-[#000666]/20 rounded-lg p-3 text-xs text-[#000666] space-y-1">
                 <div className="font-bold flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#a14000]" /> AI Curator Analysis
+                  <Sparkles className="w-3.5 h-3.5 text-[#a14000]" /> Analisis Kurator AI
                 </div>
                 <p>{aiInsight}</p>
               </div>
@@ -146,12 +157,12 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
               {loadingAi ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Analyzing...
+                  Menganalisis...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5 text-[#ffe088]" />
-                  AI Analysis
+                  Analisis AI
                 </>
               )}
             </button>
@@ -173,6 +184,19 @@ export const MotifModal: React.FC<MotifModalProps> = ({ motif, onClose, onAddToC
               Tutup
             </button>
           </div>
+        </div>
+        </div>
+
+        {/* Bukti Keaslian — inti pembeda produk ini, diberi lebar penuh karena
+            di sinilah pembeli menilai sendiri sebelum memutuskan membeli. */}
+        <div className="p-4 md:p-6 border-t border-[#767683]/15 bg-[#efeeea]/40">
+          <ProofPanel
+            productId={motif.id}
+            priceIDR={motif.priceIDR}
+            currency={currency}
+            isHeritageMotif={HERITAGE_MOTIF_IDS.has(motif.id)}
+            fallbackArtisanId={PRODUCT_ARTISAN_MAP[motif.id]}
+          />
         </div>
       </div>
     </div>

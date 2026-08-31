@@ -119,7 +119,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               Finalize Your Acquisition
             </h1>
             <p className="text-sm text-[#454652] mt-1 max-w-2xl">
-              Authentic heritage pieces curated for preservation. Complete the details below to secure your selection from our artisan archives.
+              Lengkapi data di bawah untuk menyelesaikan pesanan. Nama pengrajin dan bukti prosesnya ikut tercatat pada pesanan Anda.
               <br />
               <span className="italic text-xs text-[#a14000] font-medium">
                 (Karya warisan autentik yang dikurasi untuk pelestarian. Harap lengkapi detail di bawah untuk mengamankan pesanan Anda.)

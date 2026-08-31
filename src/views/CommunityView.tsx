@@ -17,6 +17,7 @@ import {
   Award,
   Filter
 } from 'lucide-react';
+import { IMG } from '../assets/images';
 
 interface CommunityViewProps {
   threads: ForumThread[];
@@ -70,7 +71,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
         {
           id: `r-${Date.now()}`,
           authorName: 'Pengrajin Terverifikasi (Anda)',
-          authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6GAZNx-92AGvmb5RF-2fC3Hqsre5AhVt_B88bMjkDziG2cemMFKUQ9wO_B7f2kzSmWx6tu9okfBEQFSPCTLprRLHSxMIga4e-qVt68jedfpkZNbwgdPoAqOVpx7uta6kXK5ttNKaG5VRmd-WQ-_uLnpkS120GloHY9vuSz0M3nSWMx5q6NUUkcALn1UMZrezFJVEQTPNAQXm7d_eTd4bLFc-dZnuNl8V_W2Bri-inNfrJQHBhvji-TA',
+          authorAvatar: IMG['artisan_avatar'],
           timeAgo: 'Baru saja',
           content: replyText.trim(),
         },

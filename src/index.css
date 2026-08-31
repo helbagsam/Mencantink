@@ -58,3 +58,30 @@
 
 
 
+
+/* Animasi munculnya modal dan notifikasi.
+   Kelas animate-fade-in dipakai di delapan tempat sejak awal, tetapi tidak
+   pernah didefinisikan di mana pun — Tailwind tidak menyediakannya bawaan.
+   Jadi selama ini seluruh modal dan toast muncul mendadak tanpa transisi,
+   dan tidak ada yang menyadarinya karena kelas yang tidak dikenal memang
+   diabaikan diam-diam. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+  }
+}
