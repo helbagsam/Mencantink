@@ -4,6 +4,7 @@ import { Menu, X, ShoppingCart, Truck, Globe, UserCheck } from 'lucide-react';
 import { Currency } from '../types';
 import { PRIMARY_NAV, ROUTES } from '../routes';
 import { BatikLogo } from './BatikLogo';
+import { useSession } from '../hooks/useSession';
 
 interface NavigationProps {
   onOpenAuth: () => void;
@@ -32,6 +33,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { session } = useSession();
 
   const isPortal = location.pathname.startsWith(ROUTES.portal);
 
@@ -129,9 +131,21 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           <button
             onClick={onOpenAuth}
-            className="hidden 2xl:block border border-[#a14000] text-[#a14000] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all shadow-sm whitespace-nowrap shrink-0"
+            className={`hidden 2xl:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm whitespace-nowrap shrink-0 border ${
+              session
+                ? 'bg-[#a14000] text-white border-[#a14000]'
+                : 'border-[#a14000] text-[#a14000] hover:bg-[#a14000] hover:text-white'
+            }`}
+            title={session ? 'Kelola sesi' : 'Masuk ke portal'}
           >
-            Masuk
+            {session ? (
+              <>
+                <UserCheck className="w-3.5 h-3.5" />
+                {session.displayName.split(' ')[0]}
+              </>
+            ) : (
+              'Masuk'
+            )}
           </button>
 
           <button
@@ -191,7 +205,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               }}
               className="w-full py-2.5 text-center border border-[#a14000] text-[#a14000] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all"
             >
-              Masuk
+              {session ? `Keluar / Ganti Akun (${session.displayName})` : 'Masuk'}
             </button>
           </div>
         </div>

@@ -20,6 +20,7 @@ import { MotifModal } from './components/MotifModal';
 import { StartDiscussionModal } from './components/StartDiscussionModal';
 import { WriteReviewModal } from './components/WriteReviewModal';
 import { AuthModal } from './components/AuthModal';
+import { RequireRole } from './components/RequireRole';
 
 import { HomeView } from './views/HomeView';
 import { EducationView } from './views/EducationView';
@@ -33,6 +34,7 @@ import { CommunityView } from './views/CommunityView';
 import { HeritageView } from './views/HeritageView';
 import { ArtisansView } from './views/ArtisansView';
 import { ArtisanProfileView } from './views/ArtisanProfileView';
+import { VerificationQueueView } from './views/VerificationQueueView';
 
 /**
  * Jembatan dari penamaan tab lama ke alamat halaman.
@@ -372,22 +374,47 @@ export function App() {
           <Route
             path={ROUTES.portal}
             element={
-              <DashboardView
-                onNavigateTab={goTab}
-                onOpenWriteReview={() => setIsWriteReviewOpen(true)}
-                onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
-                orders={orders}
-              />
+              <RequireRole
+                allow={['artisan']}
+                reason="Portal memuat daftar pesanan berikut nama dan kota pembeli, jadi hanya terbuka untuk pengrajin yang bersangkutan."
+                onOpenAuth={() => setIsAuthOpen(true)}
+              >
+                <DashboardView
+                  onNavigateTab={goTab}
+                  onOpenWriteReview={() => setIsWriteReviewOpen(true)}
+                  onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
+                  orders={orders}
+                />
+              </RequireRole>
             }
           />
 
           <Route
             path={ROUTES.portalUpload}
             element={
-              <OnboardingView
-                onNavigateTab={goTab}
-                onAddProductToCatalog={handleAddProductToCatalog}
-              />
+              <RequireRole
+                allow={['artisan']}
+                reason="Hanya pengrajin terdaftar yang boleh menerbitkan kain beserta paket buktinya."
+                onOpenAuth={() => setIsAuthOpen(true)}
+              >
+                <OnboardingView
+                  onNavigateTab={goTab}
+                  onAddProductToCatalog={handleAddProductToCatalog}
+                />
+              </RequireRole>
+            }
+          />
+
+          <Route
+            path={ROUTES.verification}
+            element={
+              <RequireRole
+                allow={['verifier']}
+                reason="Ruang tinjauan hanya untuk verifikator, karena di sinilah keputusan keaslian dibuat dan dicatat atas nama seseorang."
+                onOpenAuth={() => setIsAuthOpen(true)}
+              >
+                <VerificationQueueView />
+              </RequireRole>
             }
           />
 

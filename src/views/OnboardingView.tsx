@@ -1,366 +1,554 @@
-import React, { useState } from 'react';
-import { NavTab, ProductListingDraft, BatikMotif } from '../types';
-import { CANTING_WORKSHOP_IMG } from '../data/mockData';
-import { 
-  Check, 
-  Upload, 
-  ArrowLeft, 
-  CheckCircle, 
-  Sparkles, 
-  Image as ImageIcon,
+import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Check,
+  Upload,
+  ArrowLeft,
+  CheckCircle,
+  Sparkles,
   Loader2,
-  PackageCheck
+  PackageCheck,
+  AlertTriangle,
+  Camera,
+  Info,
+  X,
 } from 'lucide-react';
-import { IMG } from '../assets/images';
+import { BatikMotif, NavTab } from '../types';
+import {
+  HERITAGE_MOTIF_NOTICE,
+  PROOF_KINDS,
+  ProofAsset,
+  ProofKind,
+  ProofPack,
+  REQUIRED_PROOF_KINDS,
+} from '../domain/trust';
+import { saveProofPack } from '../services/trustService';
+import { newId, nowIso } from '../services/storage';
+import { useSession } from '../hooks/useSession';
+import { ROUTES } from '../routes';
 
 interface OnboardingViewProps {
   onNavigateTab: (tab: NavTab) => void;
   onAddProductToCatalog: (newMotif: BatikMotif) => void;
 }
 
+/** Urutan tampil: yang wajib dulu, remekan opsional di akhir. */
+const URUTAN_BUKTI: ProofKind[] = ['front', 'back', 'macro', 'process_video', 'crack'];
+
+/**
+ * Nama motif klasik yang termasuk Ekspresi Budaya Tradisional. Kalau pengrajin
+ * memakai nama ini, keterangan hak cipta dimunculkan supaya tidak ada yang
+ * mengira motifnya jadi milik pribadi setelah diunggah.
+ */
+const MOTIF_WARISAN = ['parang', 'kawung', 'truntum', 'megamendung', 'mega mendung', 'sekar jagad', 'sido', 'sidomukti'];
+
+/**
+ * Menyusutkan gambar sebelum disimpan.
+ *
+ * Foto kamera ponsel bisa 3-8 MB, sedangkan localStorage hanya sekitar 5 MB
+ * untuk seluruh aplikasi. Tanpa penyusutan, mengunggah dua foto saja sudah
+ * membuat penyimpanan penuh dan diam-diam gagal. Setelah data pindah ke
+ * server, berkas aslinya yang disimpan dan fungsi ini tinggal dilepas.
+ */
+async function susutkanGambar(file: File, maksSisi = 1200, mutu = 0.72): Promise<string> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  if (!file.type.startsWith('image/')) return dataUrl;
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = reject;
+    el.src = dataUrl;
+  });
+
+  const skala = Math.min(1, maksSisi / Math.max(img.width, img.height));
+  if (skala === 1 && dataUrl.length < 400_000) return dataUrl;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.width * skala);
+  canvas.height = Math.round(img.height * skala);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', mutu);
+}
+
+/**
+ * UNGGAH KAIN BARU.
+ *
+ * Versi sebelumnya membiarkan pengrajin menerbitkan kain ke katalog tanpa satu
+ * pun bukti, dan borangnya terisi awal "Parang Rusak Barong" lengkap dengan
+ * filosofi karangan — motif warisan diklaim sebagai karya baru. Keduanya
+ * bertentangan dengan dasar produk ini.
+ *
+ * Sekarang paket bukti wajib lengkap sebelum kain bisa dikirim, dan kain yang
+ * dikirim masuk ke antrean tinjauan, bukan langsung terpajang di pasar.
+ */
 export const OnboardingView: React.FC<OnboardingViewProps> = ({
   onNavigateTab,
   onAddProductToCatalog,
 }) => {
-  const [productName, setProductName] = useState('Parang Rusak Barong');
-  const [price, setPrice] = useState('2,500,000');
-  const [description, setDescription] = useState(
-    'A majestic royal Parang motif crafted with premium natural Sogan wax resist dyes. Hand-drawn on Mori Primissima silk, embodying endurance and noble leadership.'
-  );
+  const { session } = useSession();
+
+  const [productName, setProductName] = useState('');
+  const [price, setPrice] = useState('');
+  const [description, setDescription] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [technique, setTechnique] = useState<'Tulis' | 'Cap'>('Tulis');
-  const [region, setRegion] = useState('Central Java');
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [region, setRegion] = useState('');
 
+  const [bukti, setBukti] = useState<Partial<Record<ProofKind, ProofAsset>>>({});
   const [generatingAi, setGeneratingAi] = useState(false);
-  const [completeSuccess, setCompleteSuccess] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [mengirim, setMengirim] = useState(false);
+  const [selesai, setSelesai] = useState<{ nama: string } | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const buktiKurang = useMemo(
+    () => REQUIRED_PROOF_KINDS.filter((k) => !bukti[k]),
+    [bukti],
+  );
+
+  const namaMengandungMotifWarisan = useMemo(() => {
+    const n = productName.toLowerCase();
+    return MOTIF_WARISAN.some((m) => n.includes(m));
+  }, [productName]);
+
+  const bolehKirim =
+    productName.trim().length > 2 &&
+    region.trim().length > 1 &&
+    price.trim().length > 0 &&
+    buktiKurang.length === 0 &&
+    !mengirim;
+
+  const handleBerkas = async (kind: ProofKind, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = await susutkanGambar(file);
+    setBukti((prev) => ({
+      ...prev,
+      [kind]: {
+        id: newId(),
+        kind,
+        url,
+        mimeType: file.type || 'image/jpeg',
+        capturedAt: nowIso(),
+      },
+    }));
   };
 
-  const handleGenerateAiDescription = async () => {
+  const hapusBukti = (kind: ProofKind) => {
+    setBukti((prev) => {
+      const next = { ...prev };
+      delete next[kind];
+      return next;
+    });
+  };
+
+  /**
+   * AI membantu menyusun deskripsi jualan dari kata kunci pengrajin.
+   *
+   * Perhatikan yang TIDAK dilakukan di sini: AI tidak lagi diminta mengarang
+   * filosofi dan sejarah motif. Filosofi batik adalah fakta budaya; kalau
+   * dikarang model lalu keliru, yang rusak justru kredibilitas yang menjadi
+   * seluruh jualan platform ini. Menyusun kalimat jualan dari keterangan yang
+   * diberikan pengrajin sendiri adalah pekerjaan yang memang cocok untuk AI,
+   * dan menjawab hambatan nyata: banyak pengrajin tidak sempat menulis.
+   */
+  const handleBantuTulis = async () => {
     setGeneratingAi(true);
+    setAiError(null);
     try {
       const res = await fetch('/api/gemini/generate-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          motifName: productName,
+          motifName: productName || 'Kain batik',
           technique,
-          region,
-          keywords: 'Master artisan level, premium silk fabric',
+          region: region || 'Indonesia',
+          keywords: keywords || 'kain batik buatan tangan',
         }),
       });
-
       const data = await res.json();
+      if (data.error) {
+        setAiError('Bantuan tulis belum tersedia. Silakan tulis manual dulu.');
+        return;
+      }
       if (data.result) {
         try {
           const parsed = JSON.parse(data.result);
-          if (parsed.heritageDescription) {
-            setDescription(parsed.heritageDescription);
-          } else {
-            setDescription(data.result);
-          }
-          if (parsed.suggestedPrice) {
-            setPrice(parsed.suggestedPrice.replace(/[^0-9,.]/g, ''));
-          }
+          setDescription(parsed.heritageDescription || data.result);
         } catch {
           setDescription(data.result);
         }
       }
-    } catch (err) {
-      console.error('Failed to generate AI description');
+    } catch {
+      setAiError('Bantuan tulis gagal dihubungi. Silakan tulis manual dulu.');
     } finally {
       setGeneratingAi(false);
     }
   };
 
-  const handleCompleteSetup = () => {
-    if (!productName.trim()) return;
+  const handleKirim = async () => {
+    if (!bolehKirim || !session?.artisanId) return;
+    setMengirim(true);
 
-    const newMotif: BatikMotif = {
-      id: `custom-${Date.now()}`,
-      name: productName.trim(),
-      region,
-      technique,
-      motifType: 'Geometris',
-      description: description || 'Masterpiece created by certified master artisan.',
-      philosophy: 'Continuous endurance, noble strength, and spiritual harmony.',
-      originHistory: 'Hand-crafted during 2024 Artisan Workshop Residency.',
-      imageUrl: imagePreview || IMG['parang-rusak'],
-      priceEstimate: `IDR ${price}`,
-      tags: ['New Masterpiece', technique, region],
+    const productId = `kain-${newId().slice(0, 8)}`;
+    const daftarBukti = URUTAN_BUKTI.map((k) => bukti[k]).filter((b): b is ProofAsset => Boolean(b));
+
+    const pack: ProofPack = {
+      id: newId(),
+      productId,
+      artisanId: session.artisanId,
+      assets: daftarBukti,
+      status: 'submitted',
+      submittedAt: nowIso(),
+      aiPrecheck: {
+        checkedAt: nowIso(),
+        completeness: 'complete',
+        missingKinds: [],
+        notesForReviewer: [
+          'Seluruh berkas wajib terlampir.',
+          'Pemeriksaan ini hanya menilai kelengkapan berkas, bukan keaslian kain.',
+        ],
+        model: 'pemeriksa kelengkapan',
+      },
     };
 
-    onAddProductToCatalog(newMotif);
-    setCompleteSuccess(true);
+    await saveProofPack(pack);
+
+    const hargaAngka = parseInt(price.replace(/[^0-9]/g, ''), 10);
+
+    const motifBaru: BatikMotif = {
+      id: productId,
+      name: productName.trim(),
+      region: region.trim(),
+      technique,
+      motifType: 'Non-Geometris',
+      description: description.trim() || 'Belum ada keterangan dari pengrajin.',
+      // Filosofi dan sejarah sengaja dikosongkan. Keduanya fakta budaya yang
+      // tidak boleh diisi otomatis oleh sistem maupun dikarang model.
+      philosophy: '',
+      originHistory: '',
+      imageUrl: bukti.front?.url ?? '',
+      priceIDR: isNaN(hargaAngka) ? undefined : hargaAngka,
+      priceEstimate: price.trim() ? `Rp ${price.trim()}` : undefined,
+      artisanName: session.displayName,
+      tags: [technique, region.trim()].filter(Boolean),
+    };
+
+    onAddProductToCatalog(motifBaru);
+    setSelesai({ nama: motifBaru.name });
+    setMengirim(false);
   };
 
-  return (
-    <div className="w-full min-h-screen bg-[#fbf9f5] pt-24 pb-20 px-4 flex flex-col items-center justify-center">
-      <main className="w-full max-w-4xl bg-white border border-[#767683]/15 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row relative">
-        {/* Background Decorative Element */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#000666]/5 rounded-bl-full pointer-events-none z-0" />
-
-        {/* Left Side: Stepper & Information */}
-        <aside className="w-full md:w-1/3 bg-[#f5f3ef] border-b md:border-b-0 md:border-r border-[#767683]/15 p-8 relative z-10 flex flex-col justify-between">
-          <div>
-            <div className="mb-10">
-              <h1 className="font-serif-garamond text-2xl font-bold text-[#000666] tracking-tight">
-                Batik Nusantara
-              </h1>
-              <p className="text-sm text-[#454652] mt-0.5 font-medium">Artisan Onboarding</p>
-            </div>
-
-            {/* Stepper */}
-            <nav aria-label="Progress">
-              <ol className="space-y-8">
-                {/* Step 1 Completed */}
-                <li className="relative flex items-start group">
-                  <div className="flex items-center">
-                    <span className="w-8 h-8 rounded-full bg-[#000666] text-white flex items-center justify-center font-bold text-xs">
-                      <Check className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <div className="ml-4 flex flex-col">
-                    <span className="text-[11px] font-bold text-[#000666] uppercase tracking-widest">Step 1</span>
-                    <span className="text-sm font-semibold text-[#1b1c1a]">Profile Setup</span>
-                  </div>
-                </li>
-
-                {/* Step 2 Completed */}
-                <li className="relative flex items-start group">
-                  <div className="flex items-center">
-                    <span className="w-8 h-8 rounded-full bg-[#000666] text-white flex items-center justify-center font-bold text-xs">
-                      <Check className="w-4 h-4" />
-                    </span>
-                  </div>
-                  <div className="ml-4 flex flex-col">
-                    <span className="text-[11px] font-bold text-[#000666] uppercase tracking-widest">Step 2</span>
-                    <span className="text-sm font-semibold text-[#1b1c1a]">Certification</span>
-                  </div>
-                </li>
-
-                {/* Step 3 Active */}
-                <li className="relative flex items-start group">
-                  <div className="flex items-center">
-                    <span className="w-8 h-8 rounded-full border-2 border-[#000666] bg-white flex items-center justify-center">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#000666]" />
-                    </span>
-                  </div>
-                  <div className="ml-4 flex flex-col">
-                    <span className="text-[11px] font-bold text-[#000666] uppercase tracking-widest">Step 3</span>
-                    <span className="text-sm font-bold text-[#000666]">Shop Setup</span>
-                  </div>
-                </li>
-              </ol>
-            </nav>
+  /* ---------------------------------------------------------------- */
+  /* Layar setelah terkirim                                            */
+  /* ---------------------------------------------------------------- */
+  if (selesai) {
+    return (
+      <div className="w-full min-h-screen bg-[#fbf9f5] pt-28 pb-20 px-4 flex items-start justify-center">
+        <div className="max-w-lg w-full bg-white border border-[#767683]/20 rounded-xl p-7 text-center shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-[#e0e7ff] flex items-center justify-center mx-auto mb-4">
+            <PackageCheck className="w-7 h-7 text-[#000666]" />
           </div>
+          <h2 className="font-serif-garamond text-2xl font-bold text-[#000666] mb-2">
+            Terkirim ke antrean tinjauan
+          </h2>
+          <p className="text-xs text-[#454652] leading-relaxed mb-5">
+            <strong>{selesai.nama}</strong> sudah masuk beserta paket buktinya. Kain ini belum
+            dijual di Pasar Nusantara sampai verifikator selesai memeriksa buktinya. Itu memang
+            aturannya, dan itu pula yang membuat kain berbukti di sini bernilai.
+          </p>
 
-          {/* Grayscale Canting Workshop Photo */}
-          <div className="mt-12 hidden md:block">
-            <div
-              className="w-full h-44 bg-cover bg-center rounded-lg shadow-sm border border-[#767683]/10 grayscale hover:grayscale-0 transition-all duration-500"
-              style={{ backgroundImage: `url('${CANTING_WORKSHOP_IMG}')` }}
-            />
-          </div>
-        </aside>
-
-        {/* Right Side: Product Listing Preview Setup Form */}
-        <div className="w-full md:w-2/3 p-8 md:p-12 relative z-10 flex flex-col justify-between">
-          <div>
-            <div className="mb-8">
-              <h2 className="font-serif-garamond text-3xl font-bold text-[#000666] mb-2">
-                Prepare Your Digital Workshop
-              </h2>
-              <p className="text-sm text-[#454652] leading-relaxed">
-                Preview how your crafts will be presented to collectors and institutional buyers. Set up your first product offering below.
-              </p>
-            </div>
-
-            {/* Container for Product Listing Preview Form */}
-            <div className="bg-[#fbf9f5] border border-[#767683]/15 rounded-lg p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between border-b border-[#cba72f]/20 pb-3">
-                <h3 className="font-serif-garamond text-xl font-bold text-[#1b1c1a]">
-                  Product Listing Preview
-                </h3>
-                <span className="text-xs font-bold bg-[#ffe088] text-[#4e3d00] px-3 py-1 rounded-full uppercase tracking-wider">
-                  Draft
-                </span>
-              </div>
-
-              {/* Photo Upload Area */}
-              <div>
-                <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest mb-2">
-                  Product Imagery
-                </label>
-                <div className="relative border-2 border-dashed border-[#c6c5d4] rounded-md bg-[#f5f3ef] hover:bg-[#eae8e4] transition-colors p-6 text-center cursor-pointer group">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  {imagePreview ? (
-                    <div className="flex flex-col items-center">
-                      <img
-                        src={imagePreview}
-                        alt="Product Preview"
-                        className="h-32 object-cover rounded border border-[#767683]/20 mb-2"
-                      />
-                      <span className="text-xs text-[#000666] font-semibold underline">
-                        Click to change image
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <ImageIcon className="w-10 h-10 mx-auto text-[#767683] group-hover:text-[#000666] transition-colors" />
-                      <div className="text-xs text-[#454652]">
-                        <span className="font-semibold text-[#000666]">Upload a file</span> or drag and drop
-                      </div>
-                      <p className="text-[11px] text-[#767683]">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Inputs Form */}
-              <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
-                <div className="sm:col-span-4">
-                  <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest mb-1">
-                    Motif / Product Name
-                  </label>
-                  <input
-                    type="text"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    placeholder="e.g. Parang Rusak Barong"
-                    className="w-full bg-transparent border-0 border-b border-[#767683] py-2 text-sm text-[#1b1c1a] focus:outline-none focus:border-[#000666] font-sans"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest mb-1">
-                    Price (IDR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-0 top-2 text-xs text-[#767683] font-semibold">Rp</span>
-                    <input
-                      type="text"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full pl-6 bg-transparent border-0 border-b border-[#767683] py-2 text-sm text-[#1b1c1a] focus:outline-none focus:border-[#000666] font-sans"
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-3">
-                  <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest mb-1">
-                    Craft Technique
-                  </label>
-                  <select
-                    value={technique}
-                    onChange={(e) => setTechnique(e.target.value as any)}
-                    className="w-full bg-transparent border-0 border-b border-[#767683] py-2 text-sm text-[#1b1c1a] focus:outline-none focus:border-[#000666]"
-                  >
-                    <option value="Tulis">Tulis (Hand drawn wax)</option>
-                    <option value="Cap">Cap (Copper stamp)</option>
-                  </select>
-                </div>
-
-                <div className="sm:col-span-3">
-                  <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest mb-1">
-                    Region of Origin
-                  </label>
-                  <input
-                    type="text"
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="w-full bg-transparent border-0 border-b border-[#767683] py-2 text-sm text-[#1b1c1a] focus:outline-none focus:border-[#000666]"
-                  />
-                </div>
-
-                <div className="sm:col-span-6">
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-bold text-[#a14000] uppercase tracking-widest">
-                      Heritage Description
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleGenerateAiDescription}
-                      disabled={generatingAi}
-                      className="text-[11px] font-bold text-[#000666] hover:text-[#a14000] flex items-center gap-1 transition-colors"
-                    >
-                      {generatingAi ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          AI Writing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-3 h-3 text-[#a14000]" />
-                          Auto-generate with AI
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <textarea
-                    rows={3}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe the philosophical meaning, technique (Tulis/Cap), and origin of this piece..."
-                    className="w-full bg-transparent border-0 border-b border-[#767683] py-2 text-sm text-[#1b1c1a] focus:outline-none focus:border-[#000666] resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Success Overlay Modal or Message */}
-          {completeSuccess && (
-            <div className="mt-6 p-4 bg-[#e0e0ff] border border-[#000666]/30 rounded-lg text-sm text-[#000666] flex items-center justify-between animate-fade-in">
-              <div className="flex items-center gap-2">
-                <PackageCheck className="w-5 h-5 text-[#a14000]" />
-                <span>Product listing published to the Association Heritage Catalog!</span>
-              </div>
-              <button
-                onClick={() => onNavigateTab('catalog')}
-                className="px-3 py-1 bg-[#000666] text-white rounded text-xs font-bold uppercase tracking-wider hover:bg-[#1a237e]"
-              >
-                View Catalog
-              </button>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="mt-8 flex justify-between items-center pt-6 border-t border-[#767683]/15">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link
+              to={ROUTES.verification}
+              className="flex-1 py-3 bg-[#000666] text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#1a237e] transition-colors"
+            >
+              Lihat Antrean Tinjauan
+            </Link>
             <button
-              type="button"
               onClick={() => onNavigateTab('portal')}
-              className="text-xs font-bold text-[#454652] hover:text-[#000666] uppercase tracking-widest flex items-center gap-1 transition-colors"
+              className="flex-1 py-3 border border-[#767683]/30 text-[#1b1c1a] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#efeeea] transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleCompleteSetup}
-              className="bg-[#000666] text-white hover:bg-[#1a237e] px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-sm flex items-center gap-2"
-            >
-              Complete Setup
-              <CheckCircle className="w-4 h-4 text-[#ffe088]" />
+              Kembali ke Portal
             </button>
           </div>
         </div>
-      </main>
+      </div>
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Borang                                                            */
+  /* ---------------------------------------------------------------- */
+  return (
+    <div className="w-full min-h-screen bg-[#fbf9f5] pt-28 pb-20 px-4">
+      <div className="max-w-3xl mx-auto">
+        <button
+          onClick={() => onNavigateTab('portal')}
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#a14000] hover:underline mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Portal Pengrajin
+        </button>
+
+        <h1 className="font-serif-garamond text-3xl md:text-4xl font-bold text-[#000666] mb-2">
+          Unggah Kain Baru
+        </h1>
+        <p className="text-sm text-[#454652] leading-relaxed mb-8 max-w-2xl">
+          Isi keterangan kain, lalu lampirkan bukti prosesnya. Kain tidak akan tampil di Pasar
+          Nusantara sebelum buktinya ditinjau verifikator.
+        </p>
+
+        {/* ---------------------------------------------------------- */}
+        {/* Bagian 1: keterangan kain                                   */}
+        {/* ---------------------------------------------------------- */}
+        <section className="bg-white border border-[#767683]/20 rounded-xl p-6 mb-5">
+          <h2 className="font-serif-garamond text-xl font-bold text-[#000666] mb-4">
+            1. Keterangan Kain
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000] mb-1">
+                Nama Kain
+              </label>
+              <input
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="mis. Parang Sogan garapan sendiri"
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#000666]"
+              />
+              {namaMengandungMotifWarisan && (
+                <p className="text-[11px] text-[#854d0e] leading-relaxed mt-2 flex gap-1.5">
+                  <Info className="w-3.5 h-3.5 shrink-0 mt-px" />
+                  {HERITAGE_MOTIF_NOTICE}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000] mb-1">
+                Teknik
+              </label>
+              <select
+                value={technique}
+                onChange={(e) => setTechnique(e.target.value as 'Tulis' | 'Cap')}
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#000666]"
+              >
+                <option value="Tulis">Batik Tulis</option>
+                <option value="Cap">Batik Cap</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000] mb-1">
+                Daerah
+              </label>
+              <input
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                placeholder="mis. Cirebon"
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#000666]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000] mb-1">
+                Harga (Rupiah)
+              </label>
+              <input
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                inputMode="numeric"
+                placeholder="mis. 850000"
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#000666]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000] mb-1">
+                Kata Kunci
+              </label>
+              <input
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="mis. sutra, pewarna indigo alami"
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#000666]"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#a14000]">
+                  Keterangan Jualan
+                </label>
+                <button
+                  onClick={handleBantuTulis}
+                  disabled={generatingAi || !productName.trim()}
+                  className="text-[10px] font-bold uppercase tracking-wider text-[#000666] hover:underline flex items-center gap-1 disabled:opacity-40 disabled:no-underline"
+                >
+                  {generatingAi ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" /> Menyusun...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" /> Bantu tuliskan
+                    </>
+                  )}
+                </button>
+              </div>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                placeholder="Ceritakan kainnya dengan kalimat Anda sendiri. Atau isi kata kunci di atas, lalu tekan Bantu tuliskan."
+                className="w-full bg-[#f5f3ef] border border-[#767683]/30 rounded-lg px-3 py-2 text-sm leading-relaxed focus:outline-none focus:border-[#000666]"
+              />
+              {aiError && <p className="text-[11px] text-[#9f1239] mt-1">{aiError}</p>}
+              <p className="text-[10px] text-[#767683] leading-relaxed mt-1.5">
+                Bantuan tulis hanya menyusun kalimat jualan dari kata kunci Anda. Filosofi dan
+                sejarah motif tidak diisi otomatis, karena itu fakta budaya yang tidak boleh
+                dikarang sistem.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- */}
+        {/* Bagian 2: bukti proses                                      */}
+        {/* ---------------------------------------------------------- */}
+        <section className="bg-white border border-[#767683]/20 rounded-xl p-6 mb-5">
+          <h2 className="font-serif-garamond text-xl font-bold text-[#000666] mb-1">
+            2. Bukti Proses
+          </h2>
+          <p className="text-xs text-[#454652] leading-relaxed mb-4">
+            Cukup pakai kamera ponsel. Bukti inilah yang membuat kain Anda bisa dijual atas nama
+            Anda sendiri, tanpa harus lewat pedagang perantara.
+          </p>
+
+          <div className="space-y-3">
+            {URUTAN_BUKTI.map((kind) => {
+              const meta = PROOF_KINDS[kind];
+              const terisi = bukti[kind];
+              return (
+                <div
+                  key={kind}
+                  className={`rounded-lg border p-3.5 transition-colors ${
+                    terisi ? 'border-[#166534]/30 bg-[#dcfce7]/30' : 'border-[#767683]/25 bg-[#f5f3ef]'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {terisi ? (
+                      <img
+                        src={terisi.url}
+                        alt=""
+                        className="w-16 h-16 rounded object-cover border border-[#767683]/20 shrink-0"
+                      />
+                    ) : (
+                      <span className="w-16 h-16 rounded bg-white border border-dashed border-[#767683]/40 flex items-center justify-center shrink-0">
+                        <Camera className="w-5 h-5 text-[#767683]" />
+                      </span>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[#1b1c1a] flex items-center gap-1.5 flex-wrap">
+                        {meta.labelId}
+                        {meta.required ? (
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-[#9f1239]">
+                            Wajib
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-[#767683]">
+                            Opsional
+                          </span>
+                        )}
+                        {terisi && <Check className="w-3.5 h-3.5 text-[#166534]" />}
+                      </p>
+                      <p className="text-[11px] text-[#454652] leading-relaxed mt-0.5">
+                        {meta.whatToLookForId}
+                      </p>
+
+                      <div className="mt-2 flex items-center gap-2">
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-[#767683]/30 rounded text-[10px] font-bold uppercase tracking-wider text-[#000666] hover:border-[#000666]">
+                          <Upload className="w-3 h-3" />
+                          {terisi ? 'Ganti' : 'Pilih Berkas'}
+                          <input
+                            type="file"
+                            accept={kind === 'process_video' ? 'image/*,video/*' : 'image/*'}
+                            onChange={(e) => void handleBerkas(kind, e)}
+                            className="hidden"
+                          />
+                        </label>
+                        {terisi && (
+                          <button
+                            onClick={() => hapusBukti(kind)}
+                            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#9f1239] hover:underline"
+                          >
+                            <X className="w-3 h-3" />
+                            Hapus
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- */}
+        {/* Kirim                                                       */}
+        {/* ---------------------------------------------------------- */}
+        <section className="bg-white border border-[#767683]/20 rounded-xl p-6">
+          {buktiKurang.length > 0 && (
+            <div className="flex gap-3 p-3.5 bg-[#fef3c7] border border-[#854d0e]/25 rounded-lg mb-4">
+              <AlertTriangle className="w-5 h-5 text-[#854d0e] shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-[#854d0e] uppercase tracking-wider">
+                  Bukti belum lengkap
+                </p>
+                <p className="text-xs text-[#454652] mt-1 leading-relaxed">
+                  Masih kurang: <strong>{buktiKurang.map((k) => PROOF_KINDS[k].labelId).join(', ')}</strong>.
+                  Kain tidak bisa dikirim sebelum bukti wajib lengkap — itu aturan yang sama untuk
+                  semua pengrajin, termasuk yang sudah bersertifikat.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => void handleKirim()}
+            disabled={!bolehKirim}
+            className="w-full py-3.5 bg-[#000666] text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#1a237e] transition-colors disabled:bg-[#efeeea] disabled:text-[#767683] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {mengirim ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Mengirim...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-4 h-4" /> Kirim untuk Ditinjau
+              </>
+            )}
+          </button>
+
+          <p className="text-[10px] text-[#767683] leading-relaxed mt-3 text-center">
+            Setelah dikirim, kain masuk antrean verifikator. Kain baru tampil di Pasar Nusantara
+            setelah buktinya selesai ditinjau.
+          </p>
+        </section>
+      </div>
     </div>
   );
 };

@@ -15,7 +15,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     featured: true,
     priceEstimate: 'Rp 950.000 - 1.450.000',
     priceIDR: 1250000,
-    artisanName: 'Mpu Harjo & Sanggar Keraton',
+    artisanName: 'Mpu Harjo — Sanggar Keraton',
     description: 'Secara historis diperuntukkan bagi bangsawan keraton, motif Parang Rusak melambangkan semangat pantang menyerah bak ombak samudera menghantam karang.',
     philosophy: 'Garis miring diagonal berbentuk huruf "S" mewakili perjuangan tanpa putus, ketahanan mental, dan kepemimpinan luhur yang memecah batas kemampuan manusia.',
     originHistory: 'Diciptakan pada era Kesultanan Mataram oleh Sultan Agung Hanyokrokusumo saat bertapa di Pantai Selatan. Dikenakan secara sakral oleh raja dan pangeran keraton.',
@@ -38,7 +38,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     motifType: 'Geometris',
     priceEstimate: 'Rp 400.000 - 650.000',
     priceIDR: 450000,
-    artisanName: 'Koperasi Mekar Jaya Yogya',
+    artisanName: 'Koperasi Mekar Jaya',
     description: 'Mewakili irisan buah aren atau bunga teratai, motif Kawung melambangkan kesucian, netralitas, dan asal-usul kehidupan manusia dalam filosofi Jawa.',
     philosophy: 'Empat bentuk elips yang terhubung dalam lingkaran mencerminkan empat penjuru mata angin dan hati sebagai pusat kearifan, melambangkan keadilan dan kejujuran.',
     originHistory: 'Salah satu motif tertua di tanah Jawa, terdokumentasi pada ukiran relief candi Jawa Tengah sejak abad ke-13.',
@@ -48,7 +48,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga: Pencelupan berulang dalam ekstrak kayu tinggi & kulit kayu mahoni.',
       'Pelorotan: Penggodokan kain untuk melarutkan sarang malam.'
     ],
-    imageUrl: IMG['kawung'],
+    imageUrl: IMG['motif-kawung'],
     tags: ['Geometris Klasik', 'Pewarna Terracotta', 'Batik Cap']
   },
   {
@@ -59,7 +59,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     motifType: 'Non-Geometris',
     priceEstimate: 'Rp 650.000 - 950.000',
     priceIDR: 750000,
-    artisanName: 'Studio Khas Trusmi Cirebon',
+    artisanName: 'Siti Rahmawati — Studio Khas Trusmi',
     description: 'Terpengaruh oleh akulturasi seni keramik Tionghoa, pola awan berlapis ini melambangkan kesabaran, kepala dingin, serta awan pembawa hujan kesuburan.',
     philosophy: 'Tujuh gradasi warna awan mencerminkan tujuh lapisan langit dalam kosmologi tradisional, mengajarkan manusia untuk tetap tenang di bawah tekanan.',
     originHistory: 'Lahir di Cirebon dari perpaduan budaya Islam Jawa dan pedagang Tionghoa pada era Keraton Kasepuhan dan Sunan Gunung Jati.',
@@ -69,7 +69,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Nyolet Gradasi: Kuasan tangan dengan pewarna indigo pekat bertahap dari tua ke muda.',
       'Fiksasi Tawas: Penguncian warna alami dengan tawas agar tahan puluhan tahun.'
     ],
-    imageUrl: IMG['mega-mendung'],
+    imageUrl: IMG['motif-mega-mendung'],
     tags: ['Batik Pesisir', 'Nila Alami', 'Gradasi 7 Warna']
   },
   {
@@ -80,7 +80,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     motifType: 'Abstract / Floral',
     priceEstimate: 'Rp 1.100.000 - 1.450.000',
     priceIDR: 1350000,
-    artisanName: 'Maestro Batik Danar Solo',
+    artisanName: 'Danar Wibisono — Maestro Batik Danar',
     description: 'Sekar Jagad bermakna "Bunga Sejagat" atau peta keindahan alam semesta. Memadukan keunikan ragam ornamen dengan keindahan garis canting dan cap.',
     philosophy: 'Harmoni dari keberagaman motif yang berdampingan anggun dalam satu helai kain, melambangkan kedamaian dan keindahan persatuan.',
     originHistory: 'Dikembangkan oleh maestro pengrajin Surakarta untuk menampilkan penguasaan berbagai teknik batik dalam satu karya seni.',
@@ -101,7 +101,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     motifType: 'Geometris',
     priceEstimate: 'Rp 550.000 - 850.000',
     priceIDR: 600000,
-    artisanName: 'Griyo Batik Bu Wahyu',
+    artisanName: 'Wahyu Setianingsih — Griyo Batik Bu Wahyu',
     description: 'Bermotif kuntum bintang tajam yang melambangkan cinta yang bersemi kembali. Tradisional dipakaikan untuk orang tua pengantin.',
     philosophy: 'Cinta kasih orang tua yang tulus, selalu menuntun dan menerangi jalan kehidupan anak-anaknya bak bintang di malam gelap.',
     originHistory: 'Diciptakan oleh Kanjeng Ratu Kencana (Permaisuri Sunan Pakubuwana IV) sebagai simbol ketulusan cinta yang tumbuh kembali.',
@@ -111,7 +111,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga Pekat: Perendaman dalam bak soga keraton.',
       'Lorot & Pengeringan Angin: Dikeringkan di bawah naungan pohon tanpa sinar matahari langsung.'
     ],
-    imageUrl: IMG['truntum'],
+    imageUrl: IMG['motif-truntum'],
     tags: ['Simbol Cinta', 'Tulis Canting', 'Solo Keraton']
   },
   {
@@ -122,7 +122,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
     motifType: 'Satwa & Alam',
     priceEstimate: 'Rp 1.200.000 - 1.500.000',
     priceIDR: 1450000,
-    artisanName: 'Koleksi Legenda Lasem & Solo',
+    artisanName: 'Koleksi Legenda Lasem',
     description: 'Batik legendaris yang diproses di 3 kota berbeda: Merah darah ayam di Lasem, Biru nira di Pekalongan, dan Cokelat soga di Solo.',
     philosophy: 'Simbol akulturasi 3 kebudayaan (Tionghoa, Jawa pesisir, dan Jawa keraton) yang bersatu dalam kedamaian dan toleransi.',
     originHistory: 'Dibuat sejak abad ke-19 dengan melintasi sungai dan pesisir utara Jawa demi mendapatkan air dan mineral pewarna khas tiap daerah.',
@@ -132,7 +132,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pewarnaan Tahap 2 (Pekalongan): Canting tutup & celup nila biru.',
       'Pewarnaan Tahap 3 (Solo): Canting ulang & celup soga kayu mahoni.'
     ],
-    imageUrl: IMG['canting_workshop_img'],
+    imageUrl: IMG['motif-tiga-negeri'],
     tags: ['Tiga Negeri', 'Koleksi Langka', 'Akulturasi Budaya']
   }
 ];

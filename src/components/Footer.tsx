@@ -1,6 +1,8 @@
 import React from 'react';
+import { RotateCcw } from 'lucide-react';
 import { NavTab } from '../types';
 import { BatikLogo } from './BatikLogo';
+import { resetAll } from '../services/storage';
 
 interface FooterProps {
   onTabChange: (tab: NavTab) => void;
@@ -63,13 +65,34 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
           >
             Komunitas & Event
           </button>
-          <button 
-            onClick={() => onTabChange('tracking')} 
+          <button
+            onClick={() => onTabChange('tracking')}
             className="hover:text-white transition-colors hover:underline text-[#ffe088]"
           >
             Pesanan Saya
           </button>
         </nav>
+
+        {/* Mengembalikan seluruh data ke keadaan awal.
+            Dipakai saat peragaan: setelah gladi bersih, satu klik untuk
+            mengulang dari nol di depan penilai tanpa perlu membuka
+            perkakas peramban. */}
+        <div className="mt-8 pt-5 border-t border-white/10 text-center">
+          <button
+            onClick={async () => {
+              const yakin = window.confirm(
+                'Kembalikan seluruh data peragaan ke keadaan awal? Keranjang, pesanan, kain yang diunggah, dan hasil tinjauan akan dihapus.',
+              );
+              if (!yakin) return;
+              await resetAll();
+              window.location.href = '/';
+            }}
+            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[#bdc2ff]/60 hover:text-[#ffe088] transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Ulang Data Peragaan
+          </button>
+        </div>
       </div>
     </footer>
   );

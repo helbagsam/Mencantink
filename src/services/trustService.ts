@@ -117,6 +117,17 @@ export interface ProductTrustSummary {
   missingProof: ReturnType<typeof missingRequiredProof>;
   /** Tingkat yang berlaku untuk produk ini. */
   tier: TrustTier;
+  /**
+   * Boleh dibeli atau tidak.
+   *
+   * Aturan pokok platform ini: kain tanpa bukti yang sudah ditinjau tidak
+   * dijual. Kalau kain tanpa bukti tetap boleh dibeli, seluruh gagasan
+   * produk ini runtuh — pembeli kembali diminta percaya pada nama saja,
+   * persis keadaan yang hendak diperbaiki.
+   */
+  purchasable: boolean;
+  /** Alasan yang ditampilkan ke pembeli bila belum boleh dibeli. */
+  blockReason?: string;
 }
 
 export async function getProductTrust(
@@ -146,6 +157,20 @@ export async function getProductTrust(
     ? (verifiers.find((v) => v.id === verification.secondReviewerId) ?? null)
     : null;
 
+  const terverifikasi = Boolean(verification) && proofPack?.status === 'verified';
+
+  let blockReason: string | undefined;
+  if (!proofPack) {
+    blockReason =
+      'Kain ini belum dilengkapi bukti proses, jadi belum bisa dibeli. Anda dapat meminta pengrajin mengunggah buktinya lebih dulu.';
+  } else if (!terverifikasi) {
+    blockReason =
+      'Bukti kain ini masih dalam tinjauan verifikator. Pembelian dibuka setelah tinjauan selesai.';
+  } else if (verification && verification.conclusion === 'inconsistent') {
+    blockReason =
+      'Hasil tinjauan menyatakan bukti tidak konsisten dengan teknik yang diklaim. Kain ini tidak dijual.';
+  }
+
   return {
     productId,
     artisan,
@@ -153,10 +178,12 @@ export async function getProductTrust(
     verification,
     verifier,
     secondVerifier,
+    purchasable: !blockReason,
+    blockReason,
     missingProof: proofPack ? missingRequiredProof(proofPack) : [],
     // Produk tanpa bukti yang ditinjau tidak mewarisi tingkat pengrajinnya.
     // Kepercayaan melekat pada kain yang diperiksa, bukan pada nama pembuatnya.
-    tier: verification && proofPack?.status === 'verified' ? (artisan?.tier ?? 'registered') : 'registered',
+    tier: terverifikasi ? (artisan?.tier ?? 'registered') : 'registered',
   };
 }
 
@@ -177,4 +204,26 @@ export async function getArtisanLadder(artisanId: string): Promise<LadderProgres
 export async function getArtisanProofPacks(artisanId: string): Promise<ProofPack[]> {
   const packs = await getProofPacks();
   return packs.filter((p) => p.artisanId === artisanId);
+}
+
+/**
+ * Kumpulan id kain yang boleh dibeli.
+ *
+ * Dipakai grid pasar supaya tidak perlu memanggil getProductTrust satu per
+ * satu untuk setiap kartu. Aturannya tetap sama persis dengan getProductTrust:
+ * hanya kain yang paket buktinya sudah ditinjau dan hasilnya tidak menyatakan
+ * ketidaksesuaian.
+ */
+export async function getPurchasableProductIds(): Promise<Set<string>> {
+  const [packs, verifications] = await Promise.all([getProofPacks(), getVerifications()]);
+  const hasilPerPack = new Map(verifications.map((v) => [v.proofPackId, v]));
+
+  const boleh = new Set<string>();
+  for (const pack of packs) {
+    if (pack.status !== 'verified') continue;
+    const hasil = hasilPerPack.get(pack.id);
+    if (!hasil || hasil.conclusion === 'inconsistent') continue;
+    boleh.add(pack.productId);
+  }
+  return boleh;
 }

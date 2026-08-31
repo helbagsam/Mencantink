@@ -3,6 +3,7 @@ import { BatikMotif, Currency } from '../types';
 import { X, Sparkles, MapPin, Tag, Landmark, Loader2, BookOpen } from 'lucide-react';
 import { ProofPanel } from './ProofPanel';
 import { HERITAGE_MOTIF_IDS, PRODUCT_ARTISAN_MAP } from '../data/trustSeed';
+import { useProductTrust } from '../hooks/useProductTrust';
 
 interface MotifModalProps {
   motif: BatikMotif | null;
@@ -17,6 +18,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({
   onAddToCart,
   currency = 'IDR',
 }) => {
+  const { trust } = useProductTrust(motif?.id, motif ? PRODUCT_ARTISAN_MAP[motif.id] : undefined);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
@@ -166,17 +168,29 @@ export const MotifModal: React.FC<MotifModalProps> = ({
                 </>
               )}
             </button>
-            {onAddToCart && (
-              <button
-                onClick={() => {
-                  onAddToCart(motif);
-                  onClose();
-                }}
-                className="py-2.5 px-4 bg-[#a14000] text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors shadow-sm"
-              >
-                + Beli Kain Ini
-              </button>
-            )}
+            {/* Kain tanpa bukti yang sudah ditinjau tidak dijual. Aturannya
+                dipusatkan di trustService supaya tombol ini dan panel bukti di
+                bawah mustahil berbeda pendapat. */}
+            {onAddToCart &&
+              (trust?.purchasable ? (
+                <button
+                  onClick={() => {
+                    onAddToCart(motif);
+                    onClose();
+                  }}
+                  className="py-2.5 px-4 bg-[#a14000] text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors shadow-sm"
+                >
+                  + Beli Kain Ini
+                </button>
+              ) : (
+                <button
+                  disabled
+                  title={trust?.blockReason}
+                  className="py-2.5 px-4 bg-[#efeeea] text-[#767683] border border-[#767683]/25 rounded-lg text-xs font-bold uppercase tracking-wider cursor-not-allowed"
+                >
+                  Belum Dapat Dibeli
+                </button>
+              ))}
             <button
               onClick={onClose}
               className="px-4 py-2.5 border border-[#767683]/30 text-[#1b1c1a] rounded-lg text-xs font-semibold uppercase tracking-wider hover:bg-[#efeeea] transition-colors"
