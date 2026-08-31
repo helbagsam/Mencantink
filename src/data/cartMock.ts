@@ -1,60 +1,85 @@
 import { CartItem, Order } from '../types';
 import { IMG } from '../assets/images';
 
+/**
+ * Isi keranjang dan pesanan contoh untuk peragaan.
+ *
+ * Berkas ini sebelumnya bertentangan dengan katalog di beberapa titik, dan
+ * justru pada hal yang paling tidak boleh keliru di produk ini:
+ *
+ *   - Parang Rusak diatribusikan ke "Ibu Siti Rohmah" dan Mega Mendung ke
+ *     "Pak Wijaya", dua nama yang tidak ada di daftar pengrajin mana pun.
+ *     Pada platform yang seluruh alasan keberadaannya adalah supaya nama
+ *     pembuat tidak hilang, salah atribusi adalah kesalahan paling merusak.
+ *   - Mega Mendung tercatat teknik Cap di sini tetapi Tulis di katalog.
+ *   - Daerahnya tertulis Pekalongan, padahal Mega Mendung dari Cirebon.
+ *   - Pesanan contoh berpajak Rp 0, padahal checkout menerapkan PPN 11%,
+ *     sehingga totalnya tidak mungkin dihasilkan alur checkout aplikasi ini.
+ *
+ * Semuanya kini disamakan dengan katalog dan daftar pengrajin.
+ */
+
 export const INITIAL_CART_ITEMS: CartItem[] = [
   {
     id: 'cart-1',
-    name: 'Parang Kencana Indigo',
+    name: 'Parang Rusak Barong',
     motifId: 'parang-rusak',
     technique: 'Tulis',
-    fabricType: 'Premium Silk',
+    fabricType: 'Sutra Primissima',
     priceIDR: 1250000,
     quantity: 1,
-    imageUrl: IMG['cart-1'],
-    artisanName: 'Ibu Siti Rohmah',
-    region: 'Solo'
+    imageUrl: IMG['motif-truntum'],
+    artisanName: 'Mpu Harjo',
+    region: 'Surakarta / Solo',
   },
   {
     id: 'cart-2',
-    name: 'Megamendung Sunset',
+    name: 'Mega Mendung Pesisir Cirebon',
     motifId: 'mega-mendung',
-    technique: 'Cap',
-    fabricType: 'Cotton Primissima',
-    priceIDR: 650000,
+    technique: 'Tulis',
+    fabricType: 'Katun Primissima',
+    priceIDR: 750000,
     quantity: 1,
-    imageUrl: IMG['cart-2'],
-    artisanName: 'Pak Wijaya',
-    region: 'Pekalongan'
-  }
+    imageUrl: IMG['motif-mega-mendung'],
+    artisanName: 'Siti Rahmawati',
+    region: 'Cirebon',
+  },
 ];
+
+/* Angka pesanan contoh dihitung dengan rumus yang sama persis dengan
+   CheckoutView: subtotal + ongkir + PPN 11% dari (subtotal - diskon). */
+const CONTOH_SUBTOTAL = 1250000;
+const CONTOH_ONGKIR = 25000;
+const CONTOH_PAJAK = Math.round(CONTOH_SUBTOTAL * 0.11);
 
 export const INITIAL_ORDER_SAMPLE: Order = {
   id: 'BTK-8829104',
-  createdAt: 'October 28, 2024 • 09:42 AM WIB',
+  createdAt: '12 Agustus 2026 • 09.42 WIB',
   items: [
     {
       id: 'item-demo-1',
-      name: 'Hand-Drawn Batik Tulis - Royal Parang Motif',
+      name: 'Parang Rusak Barong',
+      motifId: 'parang-rusak',
       technique: 'Tulis',
-      fabricType: 'Limited Edition Series',
-      priceIDR: 1250000,
+      fabricType: 'Sutra Primissima',
+      priceIDR: CONTOH_SUBTOTAL,
       quantity: 1,
       imageUrl: IMG['item-demo-1'],
-      artisanName: 'Ibu Wahyu',
-      region: 'Surakarta'
-    }
+      artisanName: 'Mpu Harjo',
+      region: 'Surakarta / Solo',
+    },
   ],
-  subtotalIDR: 1250000,
-  shippingCostIDR: 45000,
-  taxIDR: 0,
+  subtotalIDR: CONTOH_SUBTOTAL,
+  shippingCostIDR: CONTOH_ONGKIR,
+  taxIDR: CONTOH_PAJAK,
   discountIDR: 0,
-  totalIDR: 1295000,
+  totalIDR: CONTOH_SUBTOTAL + CONTOH_ONGKIR + CONTOH_PAJAK,
   shippingAddress: {
     fullName: 'Raden Mas Sukarno',
     address: 'Jl. Diponegoro No. 12, Menteng',
     city: 'Jakarta Pusat',
     postalCode: '10310',
-    phone: '+62 812 3456 7890'
+    phone: '+62 812 3456 7890',
   },
   shippingMethod: 'standard',
   paymentMethod: 'bank_transfer',
@@ -66,37 +91,42 @@ export const INITIAL_ORDER_SAMPLE: Order = {
       id: 'tl-1',
       title: 'Package Arrived at Sorting Facility',
       titleId: 'Paket Tiba di Fasilitas Sortir',
-      timestamp: 'October 28, 2024 • 14:22 PM',
-      description: 'Semarang Regional Logistics Hub - Processing for final delivery route.',
-      descriptionId: 'Hub Logistik Regional Semarang - Proses rute pengiriman akhir.',
-      completed: true
+      timestamp: '14 Agustus 2026 • 14.22 WIB',
+      description: 'Semarang Regional Logistics Hub - processing for final delivery route.',
+      descriptionId: 'Hub Logistik Regional Semarang — pemrosesan rute pengiriman akhir.',
+      completed: true,
     },
     {
       id: 'tl-2',
       title: 'Handed Over to Courier',
       titleId: 'Diserahkan ke Kurir',
-      timestamp: 'October 28, 2024 • 10:30 AM',
+      timestamp: '13 Agustus 2026 • 10.30 WIB',
       description: 'Package collected by Nusantara Express. Tracking ID: NX-9920331-BTK.',
-      descriptionId: 'Paket diambil oleh Nusantara Express. ID Pelacakan: NX-9920331-BTK.',
-      completed: true
+      descriptionId: 'Paket diambil oleh Nusantara Express. Nomor resi: NX-9920331-BTK.',
+      completed: true,
     },
     {
       id: 'tl-3',
-      title: 'Quality Inspection Completed',
-      titleId: 'Pemeriksaan Kualitas Selesai',
-      timestamp: 'October 26, 2024 • 16:45 PM',
-      description: 'Master Artisan Bu Wahyu certified the wax-resist pattern integrity and dye consistency.',
-      descriptionId: 'Master Artisan Bu Wahyu telah menyertifikasi integritas pola malam dan konsistensi pewarna.',
-      completed: true
+      title: 'Cloth Inspection Completed',
+      titleId: 'Pemeriksaan Kain Selesai',
+      timestamp: '13 Agustus 2026 • 16.45 WIB',
+      // Sebelumnya tertulis pengrajin "menyertifikasi" kainnya sendiri.
+      // Pengrajin tidak boleh menjadi penilai keasliannya sendiri — itu
+      // meniadakan seluruh gunanya verifikasi.
+      description:
+        'Cloth condition checked against the verified proof pack before dispatch by Sanggar Keraton.',
+      descriptionId:
+        'Kondisi kain dicocokkan dengan paket bukti yang telah ditinjau sebelum dikirim oleh Sanggar Keraton.',
+      completed: true,
     },
     {
       id: 'tl-4',
-      title: 'Order Placed & Verified',
-      titleId: 'Pesanan Dibuat & Diverifikasi',
-      timestamp: 'October 24, 2024 • 09:42 AM',
+      title: 'Order Placed & Payment Confirmed',
+      titleId: 'Pesanan Dibuat & Pembayaran Dikonfirmasi',
+      timestamp: '12 Agustus 2026 • 09.42 WIB',
       description: 'Payment confirmed via Bank Transfer BCA.',
       descriptionId: 'Pembayaran dikonfirmasi melalui Transfer Bank BCA.',
-      completed: true
-    }
-  ]
+      completed: true,
+    },
+  ],
 };
