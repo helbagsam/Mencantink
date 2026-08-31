@@ -1,56 +1,71 @@
 /**
- * SESI PENGGUNA.
+ * SESI DAN PERAN PENGGUNA.
  *
  * ====================================================================
  * PERINGATAN: INI BUKAN AUTENTIKASI SUNGGUHAN
  * ====================================================================
- * Tidak ada kata sandi yang diperiksa, tidak ada token, tidak ada server
- * yang memutuskan. Sesi hanya disimpan di peramban dan siapa pun yang paham
- * peramban bisa memalsukannya.
- *
- * Gunanya di tahap ini ada dua, dan keduanya nyata:
- *   1. Menutup halaman yang seharusnya tidak terbuka untuk umum. Sebelum ini
- *      siapa pun bisa membuka /portal dan membaca nama serta kota pembeli
- *      dari daftar pesanan — pemrosesan data pribadi tanpa dasar yang sah
- *      menurut UU PDP No. 27 Tahun 2022.
- *   2. Membuat peran pengguna menjadi nyata di dalam kode, sehingga saat
- *      autentikasi sungguhan dipasang nanti, yang berubah hanya isi berkas
- *      ini — bukan setiap halaman.
- *
- * Sebelum platform dipakai bertransaksi sungguhan, ganti dengan autentikasi
- * di sisi server (mis. Supabase Auth) dan pemeriksaan hak akses per data.
+ * Tidak ada kata sandi yang diperiksa, tidak ada token, tidak ada server yang
+ * memutuskan. Sesi hanya tersimpan di peramban dan bisa dipalsukan siapa pun
+ * yang paham perkakas peramban. Gantilah dengan autentikasi di sisi server
+ * (mis. Supabase Auth) sebelum platform dipakai bertransaksi sungguhan.
  * ====================================================================
+ *
+ * SATU AKUN, BEBERAPA PERAN.
+ *
+ * Peran di sini bukan jenis akun yang terpisah, melainkan kemampuan yang
+ * menempel pada satu identitas. Alasannya sederhana: seorang pengrajin juga
+ * bisa membeli kain pengrajin lain. Kalau tiap peran dibuat akun sendiri,
+ * satu orang harus punya dua akun — dan yang paling dirugikan justru UMKM
+ * kecil yang ingin dipermudah.
+ *
+ * Karena itu setiap pengguna yang masuk selalu memiliki peran 'buyer', dan
+ * sebagian menambahnya dengan 'artisan' atau 'verifier'.
  */
 
 import { readCollection, nowIso, writeCollection } from './storage';
 
-export type Role = 'artisan' | 'verifier';
+export type Role = 'buyer' | 'artisan' | 'verifier';
+
+export const ROLE_LABEL: Record<Role, string> = {
+  buyer: 'Pembeli',
+  artisan: 'Pengrajin',
+  verifier: 'Verifikator',
+};
 
 export interface Session {
   id: string;
-  role: Role;
-  /** Pengrajin yang diwakili sesi ini. Kosong untuk verifikator. */
+  /** Selalu memuat 'buyer'. Peran lain bersifat tambahan. */
+  roles: Role[];
+  /** Pengrajin yang diwakili, bila punya peran 'artisan'. */
   artisanId?: string;
   displayName: string;
+  /** Dipakai mengaitkan pesanan ke pemesannya. */
+  accountId: string;
   signedInAt: string; // ISO 8601
 }
 
 const SESSION = 'session';
 
-/** Hanya ada satu sesi aktif pada satu waktu di peramban ini. */
 export async function getSession(): Promise<Session | null> {
   const rows = await readCollection<Session>(SESSION, []);
   return rows[0] ?? null;
 }
 
+export function hasRole(session: Session | null, role: Role): boolean {
+  return Boolean(session?.roles.includes(role));
+}
+
 export async function signIn(input: {
-  role: Role;
+  accountId: string;
+  roles: Role[];
   artisanId?: string;
   displayName: string;
 }): Promise<Session> {
   const session: Session = {
     id: 'sesi-aktif',
-    role: input.role,
+    accountId: input.accountId,
+    // Siapa pun yang masuk otomatis bisa membeli.
+    roles: Array.from(new Set<Role>(['buyer', ...input.roles])),
     artisanId: input.artisanId,
     displayName: input.displayName,
     signedInAt: nowIso(),
@@ -69,10 +84,6 @@ export async function signOut(): Promise<void> {
 /* Pemberitahuan perubahan sesi                                        */
 /* ------------------------------------------------------------------ */
 
-/**
- * Komponen perlu tahu ketika sesi berubah tanpa harus memuat ulang halaman.
- * Dipakai oleh hook useSession di komponen.
- */
 const listeners = new Set<() => void>();
 
 function notify() {
@@ -88,32 +99,49 @@ export function onSessionChange(fn: () => void): () => void {
 /* Akun peragaan                                                       */
 /* ------------------------------------------------------------------ */
 
-/**
- * Akun yang bisa dipilih saat peragaan. Ditampilkan terbuka di layar masuk
- * supaya jelas bahwa ini peragaan, bukan sistem masuk yang sebenarnya.
- */
-export const DEMO_ACCOUNTS: Array<{
-  role: Role;
-  artisanId?: string;
+export interface DemoAccount {
+  accountId: string;
   displayName: string;
+  roles: Role[];
+  artisanId?: string;
   description: string;
-}> = [
+}
+
+/**
+ * Akun untuk peragaan, ditampilkan terbuka di layar masuk supaya jelas bahwa
+ * ini peragaan dan bukan sistem masuk yang sebenarnya.
+ *
+ * Perhatikan bahwa Siti Rahmawati berperan pengrajin sekaligus pembeli. Itu
+ * bukan kebetulan: dia dipakai memperagakan bahwa satu orang bisa menjual
+ * karyanya sendiri dan membeli karya orang lain dengan akun yang sama.
+ */
+export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
-    role: 'artisan',
-    artisanId: 'art-trusmi',
-    displayName: 'Siti Rahmawati',
+    accountId: 'akun-pembeli-1',
+    displayName: 'Rani Kusuma',
+    roles: ['buyer'],
     description:
-      'Pengrajin bersertifikat kompetensi BNSP, tertahan di syarat merek terdaftar untuk Batikmark.',
+      'Pembeli. Hanya bisa menjelajah, membeli, dan melacak pesanannya sendiri.',
   },
   {
-    role: 'artisan',
-    artisanId: 'art-wahyu',
+    accountId: 'akun-siti',
+    displayName: 'Siti Rahmawati',
+    roles: ['artisan'],
+    artisanId: 'art-trusmi',
+    description:
+      'Pengrajin bersertifikat BNSP, tertahan di syarat merek terdaftar. Bisa juga membeli kain pengrajin lain.',
+  },
+  {
+    accountId: 'akun-wahyu',
     displayName: 'Wahyu Setianingsih',
+    roles: ['artisan'],
+    artisanId: 'art-wahyu',
     description: 'Pengrajin rumahan, baru sampai tingkat bukti proses terverifikasi.',
   },
   {
-    role: 'verifier',
+    accountId: 'akun-nur',
     displayName: 'Nur Cahyani',
+    roles: ['verifier'],
     description: 'Verifikator. Meninjau paket bukti yang masuk dan memutuskan hasilnya.',
   },
 ];

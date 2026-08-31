@@ -4,7 +4,9 @@ import { CheckCircle2 } from 'lucide-react';
 
 import { NavTab, BatikMotif, ForumThread, ReviewItem, CartItem, Order, Currency } from './types';
 import { MOCK_FORUM_THREADS } from './data/mockData';
+import { PRODUCT_ARTISAN_MAP } from './data/trustSeed';
 import { ROUTES } from './routes';
+import { useSession } from './hooks/useSession';
 import {
   getCart,
   getMotifs,
@@ -70,6 +72,7 @@ function ScrollToTop() {
 
 export function App() {
   const navigate = useNavigate();
+  const { session } = useSession();
 
   const [motifs, setMotifs] = useState<BatikMotif[]>([]);
   const [threads, setThreads] = useState<ForumThread[]>(MOCK_FORUM_THREADS);
@@ -118,6 +121,18 @@ export function App() {
     if (hydrated) void saveMotifs(motifs);
   }, [motifs, hydrated]);
 
+
+  /* Penyaringan kepemilikan pesanan.
+     Sebelumnya daftar pesanan bersifat global: portal setiap pengrajin
+     menampilkan seluruh penjualan berikut data pembeli pengrajin lain, dan
+     halaman pelacakan menampilkan pesanan siapa pun sebagai milik pengunjung. */
+  const pesananSayaSebagaiPembeli = orders.filter(
+    (o) => session && o.buyerAccountId === session.accountId,
+  );
+  const pesananUntukKainSaya = orders.filter(
+    (o) => session?.artisanId && o.items.some((i) => i.artisanId === session.artisanId),
+  );
+
   const goTab = useCallback(
     (tab: NavTab) => {
       navigate(TAB_TO_ROUTE[tab]);
@@ -163,6 +178,9 @@ export function App() {
         // hal pertama yang dihapus pedagang white label — di sini tidak boleh
         // hilang, apalagi oleh aplikasi kita sendiri.
         artisanName: motif.artisanName ?? 'Pengrajin belum tercatat',
+        // Mengikat kain ke pengrajinnya, supaya pesanan nanti hanya masuk ke
+        // portal pengrajin yang bersangkutan.
+        artisanId: PRODUCT_ARTISAN_MAP[motif.id],
         region: motif.region,
       };
       return [...prev, newItem];
@@ -355,6 +373,7 @@ export function App() {
                 discountIDR={discountIDR}
                 onNavigateTab={goTab}
                 onCompleteCheckout={handleCompleteCheckout}
+                onOpenAuth={() => setIsAuthOpen(true)}
               />
             }
           />
@@ -363,7 +382,11 @@ export function App() {
             path={ROUTES.orders}
             element={
               <OrderTrackingView
-                activeOrder={activeOrder}
+                activeOrder={
+                  activeOrder && pesananSayaSebagaiPembeli.some((o) => o.id === activeOrder.id)
+                    ? activeOrder
+                    : (pesananSayaSebagaiPembeli[0] ?? null)
+                }
                 currency={currency}
                 onNavigateTab={goTab}
                 onUpdateOrderStatus={handleUpdateOrderStatus}
@@ -383,7 +406,7 @@ export function App() {
                   onNavigateTab={goTab}
                   onOpenWriteReview={() => setIsWriteReviewOpen(true)}
                   onOpenStartDiscussion={() => setIsStartDiscussionOpen(true)}
-                  orders={orders}
+                  orders={pesananUntukKainSaya}
                 />
               </RequireRole>
             }

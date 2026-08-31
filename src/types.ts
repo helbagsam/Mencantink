@@ -26,6 +26,9 @@ export interface CartItem {
   quantity: number;
   imageUrl: string;
   artisanName?: string;
+  /** Pengrajin pembuat kain ini. Dipakai menyaring pesanan yang masuk ke
+      portal masing-masing pengrajin. */
+  artisanId?: string;
   region?: string;
 }
 
@@ -42,6 +45,14 @@ export interface OrderTimelineItem {
 export interface Order {
   id: string;
   createdAt: string;
+  /**
+   * Akun pemesan. Sebelumnya pesanan tidak punya pemilik sama sekali,
+   * sehingga daftar pesanan bersifat global: setiap pengrajin melihat seluruh
+   * penjualan beserta data pembeli pengrajin lain, dan pembeli mana pun
+   * melihat pesanan orang lain sebagai miliknya.
+   */
+  buyerAccountId?: string;
+  buyerName?: string;
   items: CartItem[];
   subtotalIDR: number;
   shippingCostIDR: number;

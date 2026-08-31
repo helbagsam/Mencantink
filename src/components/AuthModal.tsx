@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, LogOut, AlertTriangle, UserCheck, Eye } from 'lucide-react';
-import { DEMO_ACCOUNTS, signIn, signOut } from '../services/sessionService';
+import { DEMO_ACCOUNTS, DemoAccount, ROLE_LABEL, signIn, signOut } from '../services/sessionService';
 import { useSession } from '../hooks/useSession';
 
 interface AuthModalProps {
@@ -26,10 +26,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handlePilih = async (akun: (typeof DEMO_ACCOUNTS)[number]) => {
+  const handlePilih = async (akun: DemoAccount) => {
     setBusy(true);
     await signIn({
-      role: akun.role,
+      accountId: akun.accountId,
+      roles: akun.roles,
       artisanId: akun.artisanId,
       displayName: akun.displayName,
     });
@@ -82,7 +83,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </p>
               <p className="text-sm font-bold text-[#1b1c1a]">{session.displayName}</p>
               <p className="text-[11px] text-[#454652] mt-0.5">
-                {session.role === 'artisan' ? 'Pengrajin' : 'Verifikator'}
+                {session.roles.map((r) => ROLE_LABEL[r]).join(" · ")}
               </p>
             </div>
 
@@ -103,10 +104,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
         <div className="space-y-2.5 mt-4">
           {DEMO_ACCOUNTS.map((akun) => {
-            const aktif = session?.displayName === akun.displayName;
+            const aktif = session?.accountId === akun.accountId;
             return (
               <button
-                key={akun.displayName}
+                key={akun.accountId}
                 onClick={() => handlePilih(akun)}
                 disabled={busy || aktif}
                 className={`w-full text-left p-3.5 rounded-lg border transition-all ${
@@ -116,14 +117,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  {akun.role === 'artisan' ? (
+                  {akun.roles.includes('artisan') ? (
                     <UserCheck className="w-4 h-4 text-[#a14000] shrink-0" />
                   ) : (
                     <Eye className="w-4 h-4 text-[#000666] shrink-0" />
                   )}
                   <span className="text-sm font-bold text-[#1b1c1a]">{akun.displayName}</span>
                   <span className="text-[9px] font-bold uppercase tracking-wider text-[#767683] ml-auto">
-                    {akun.role === 'artisan' ? 'Pengrajin' : 'Verifikator'}
+                    {akun.roles.map((r) => ROLE_LABEL[r]).join(" · ")}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#454652] leading-relaxed">{akun.description}</p>

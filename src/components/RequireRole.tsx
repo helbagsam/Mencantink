@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { Role } from '../services/sessionService';
+import { ROLE_LABEL, Role } from '../services/sessionService';
 import { useSession } from '../hooks/useSession';
 import { ROUTES } from '../routes';
 
@@ -43,7 +43,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({
     );
   }
 
-  if (session && allow.includes(session.role)) {
+  if (session && allow.some((r) => session.roles.includes(r))) {
     return <>{children}</>;
   }
 
@@ -66,9 +66,9 @@ export const RequireRole: React.FC<RequireRoleProps> = ({
           {sudahMasukTapiSalahPeran ? (
             <p className="text-xs text-[#454652] leading-relaxed">
               Anda masuk sebagai <strong>{session?.displayName}</strong> (
-              {session?.role === 'artisan' ? 'pengrajin' : 'verifikator'}). Halaman ini hanya
-              terbuka untuk{' '}
-              {allow.map((r) => (r === 'artisan' ? 'pengrajin' : 'verifikator')).join(' dan ')}.
+              {session?.roles.map((r) => ROLE_LABEL[r].toLowerCase()).join(' dan ')}). Halaman ini
+              hanya terbuka untuk{' '}
+              {allow.map((r) => ROLE_LABEL[r].toLowerCase()).join(' dan ')}.
             </p>
           ) : (
             <p className="text-xs text-[#454652] leading-relaxed">

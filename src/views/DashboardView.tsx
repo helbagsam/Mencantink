@@ -301,7 +301,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onClick={() => onNavigateTab('tracking')}
                 className="bg-[#a14000] text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors"
               >
-                Track Active Order
+                Lacak Pesanan Berjalan
               </button>
             </div>
 
@@ -312,12 +312,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-[#f5f3ef] text-[#000666] uppercase font-bold tracking-wider">
-                      <th className="p-3">Order ID</th>
-                      <th className="p-3">Buyer / Address</th>
-                      <th className="p-3">Items</th>
-                      <th className="p-3">Total Amount</th>
+                      <th className="p-3">Nomor Pesanan</th>
+                      <th className="p-3">Pembeli / Tujuan</th>
+                      <th className="p-3">Kain Anda</th>
+                      <th className="p-3">Nilai Kain Anda</th>
                       <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Action</th>
+                      <th className="p-3 text-right">Tindakan</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#767683]/10">
@@ -330,11 +330,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </td>
                         <td className="p-3">
                           <p className="font-medium text-[#1b1c1a]">
-                            {ord.items.map((i) => `${i.name} (${i.quantity}x)`).join(', ')}
+                            {ord.items
+                              .filter((i) => i.artisanId === portalArtisan?.id)
+                              .map((i) => `${i.name} (${i.quantity}x)`)
+                              .join(', ')}
                           </p>
                         </td>
                         <td className="p-3 font-bold text-[#a14000]">
-                          Rp {ord.totalIDR.toLocaleString('id-ID')}
+                          Rp{' '}
+                          {ord.items
+                            .filter((i) => i.artisanId === portalArtisan?.id)
+                            .reduce((n, i) => n + i.priceIDR * i.quantity, 0)
+                            .toLocaleString('id-ID')}
                         </td>
                         <td className="p-3">
                           <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#ffe088]/40 text-[#735c00] border border-[#cba72f]/40">
@@ -346,7 +353,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             onClick={() => onNavigateTab('tracking')}
                             className="text-xs font-bold text-[#000666] hover:underline"
                           >
-                            View Tracking
+                            Lihat Pelacakan
                           </button>
                         </td>
                       </tr>
@@ -357,26 +364,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             )}
           </div>
 
-          {/* Card 3: Market Insights (Span 6) */}
+          {/* Card 3: Cermatan Pasar (Span 6) */}
           <div className="col-span-1 md:col-span-6 bg-white rounded-xl border border-[#000666]/10 p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-serif-garamond text-2xl font-bold text-[#000666]">
-                Market Insights
+                Cermatan Pasar
               </h3>
               <TrendingUp className="w-5 h-5 text-[#767683]" />
             </div>
             <ul className="space-y-4">
               <li className="flex items-center justify-between pb-3 border-b border-[#cba72f]/20">
                 <div>
-                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Trending Motif</p>
-                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Megamendung Variations</p>
+                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Motif Sedang Diminati</p>
+                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Ragam Megamendung</p>
                 </div>
-                <span className="text-xs font-bold text-[#a14000]">+24% Demand</span>
+                <span className="text-xs font-bold text-[#a14000]">+24% permintaan</span>
               </li>
               <li className="flex items-center justify-between pb-3 border-b border-[#cba72f]/20">
                 <div>
-                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Buyer Interest</p>
-                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Natural Indigo Dyes</p>
+                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Minat Pembeli</p>
+                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Pewarna Indigo Alamis</p>
                 </div>
                 <span className="text-xs font-bold text-[#a14000]">High</span>
               </li>
@@ -443,11 +450,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Community 3-Column Bento Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Artisan Reviews (Span 4) */}
+          {/* Ulasan untuk Pengrajin (Span 4) */}
           <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Artisan Reviews</h3>
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Ulasan untuk Pengrajin</h3>
                 <Star className="w-4 h-4 text-[#cba72f]" />
               </div>
               <div className="space-y-4">
@@ -478,11 +485,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
 
-          {/* Editorial Picks (Span 4) */}
+          {/* Pilihan Redaksi (Span 4) */}
           <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Editorial Picks</h3>
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Pilihan Redaksi</h3>
                 <BookOpen className="w-4 h-4 text-[#767683]" />
               </div>
               <div className="space-y-4">
@@ -517,11 +524,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           </div>
 
-          {/* Member Discussion (Span 4) */}
+          {/* Diskusi Anggota (Span 4) */}
           <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Member Discussion</h3>
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Diskusi Anggota</h3>
                 <MessageSquare className="w-4 h-4 text-[#767683]" />
               </div>
               <div className="space-y-3">

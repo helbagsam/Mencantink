@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Truck, Globe, UserCheck } from 'lucide-react';
+import { Menu, X, ShoppingCart, Truck, Globe } from 'lucide-react';
 import { Currency } from '../types';
 import { PRIMARY_NAV, ROUTES } from '../routes';
 import { BatikLogo } from './BatikLogo';
+import { signOut } from '../services/sessionService';
 import { useSession } from '../hooks/useSession';
+import { AccountMenu } from './AccountMenu';
 
 interface NavigationProps {
   onOpenAuth: () => void;
@@ -117,36 +119,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             </NavLink>
           </div>
 
-          <Link
-            to={ROUTES.portal}
-            className={`hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all shadow-sm whitespace-nowrap shrink-0 border ${
-              isPortal
-                ? 'bg-[#000666] text-white border-[#000666]'
-                : 'border-[#000666] text-[#000666] hover:bg-[#000666] hover:text-white'
-            }`}
-          >
-            <UserCheck className="w-3.5 h-3.5" />
-            Portal Pengrajin
-          </Link>
-
-          <button
-            onClick={onOpenAuth}
-            className={`hidden 2xl:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm whitespace-nowrap shrink-0 border ${
-              session
-                ? 'bg-[#a14000] text-white border-[#a14000]'
-                : 'border-[#a14000] text-[#a14000] hover:bg-[#a14000] hover:text-white'
-            }`}
-            title={session ? 'Kelola sesi' : 'Masuk ke portal'}
-          >
-            {session ? (
-              <>
-                <UserCheck className="w-3.5 h-3.5" />
-                {session.displayName.split(' ')[0]}
-              </>
-            ) : (
-              'Masuk'
-            )}
-          </button>
+          <AccountMenu onOpenAuth={onOpenAuth} />
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -190,23 +163,48 @@ export const Navigation: React.FC<NavigationProps> = ({
             </NavLink>
           ))}
 
+          {/* Di layar kecil, halaman yang ditawarkan mengikuti peran yang
+              dimiliki — sama seperti menu akun di layar lebar. */}
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-            <Link
-              to={ROUTES.portal}
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-2.5 text-center border border-[#000666] text-[#000666] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#000666] hover:text-white transition-all"
-            >
-              Portal Pengrajin
-            </Link>
-            <button
-              onClick={() => {
-                onOpenAuth();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full py-2.5 text-center border border-[#a14000] text-[#a14000] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all"
-            >
-              {session ? `Keluar / Ganti Akun (${session.displayName})` : 'Masuk'}
-            </button>
+            {session?.roles.includes('artisan') && (
+              <Link
+                to={ROUTES.portal}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 text-center border border-[#000666] text-[#000666] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#000666] hover:text-white transition-all"
+              >
+                Portal Pengrajin
+              </Link>
+            )}
+            {session?.roles.includes('verifier') && (
+              <Link
+                to={ROUTES.verification}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 text-center border border-[#000666] text-[#000666] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#000666] hover:text-white transition-all"
+              >
+                Ruang Verifikasi
+              </Link>
+            )}
+            {session ? (
+              <button
+                onClick={async () => {
+                  setMobileMenuOpen(false);
+                  await signOut();
+                }}
+                className="w-full py-2.5 text-center border border-[#9f1239] text-[#9f1239] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#9f1239] hover:text-white transition-all"
+              >
+                Keluar ({session.displayName})
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  onOpenAuth();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 text-center border border-[#a14000] text-[#a14000] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all"
+              >
+                Masuk
+              </button>
+            )}
           </div>
         </div>
       )}

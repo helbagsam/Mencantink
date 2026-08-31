@@ -10,7 +10,10 @@ interface CartViewProps {
   onRemoveItem: (id: string) => void;
   onNavigateTab: (tab: NavTab) => void;
   discountIDR: number;
-  onApplyDiscount: (code: string) => void;
+  /** Menerima nilai potongan dalam rupiah, bukan kode promonya.
+      Tipe lama menyatakan string sehingga tidak pernah cocok dengan
+      pemakaiannya — tidak ketahuan karena tipe React belum terpasang. */
+  onApplyDiscount: (discountIDR: number) => void;
 }
 
 export const CartView: React.FC<CartViewProps> = ({

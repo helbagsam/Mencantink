@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CartItem, Currency, NavTab, Order, OrderTimelineItem } from '../types';
 import { formatPrice, formatPriceSecondary } from '../utils/currency';
-import { Lock, ShieldCheck, Award, ArrowLeft, CheckCircle2, CreditCard, Landmark, QrCode, Smartphone } from 'lucide-react';
+import { Lock, ShieldCheck, Award, ArrowLeft, CheckCircle2, CreditCard, Landmark, QrCode, Smartphone, UserCircle2 } from 'lucide-react';
+import { useSession } from '../hooks/useSession';
 
 interface CheckoutViewProps {
   items: CartItem[];
@@ -9,6 +10,7 @@ interface CheckoutViewProps {
   discountIDR: number;
   onNavigateTab: (tab: NavTab) => void;
   onCompleteCheckout: (newOrder: Order) => void;
+  onOpenAuth: () => void;
 }
 
 export const CheckoutView: React.FC<CheckoutViewProps> = ({
@@ -17,9 +19,15 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   discountIDR,
   onNavigateTab,
   onCompleteCheckout,
+  onOpenAuth,
 }) => {
+  const { session } = useSession();
+
   // Form State
-  const [fullName, setFullName] = useState('Raden Mas Sukarno');
+  // Nama penerima diawali dari akun yang sedang masuk, supaya pesanan tidak
+  // tampil atas nama orang lain di portal pengrajin. Tetap bisa diubah, karena
+  // kain memang bisa dikirim ke orang lain.
+  const [fullName, setFullName] = useState(session?.displayName ?? '');
   const [streetAddress, setStreetAddress] = useState('Jl. Diponegoro No. 12, Menteng');
   const [city, setCity] = useState('Jakarta Pusat');
   const [postalCode, setPostalCode] = useState('10310');
@@ -76,6 +84,10 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
       const newOrder: Order = {
         id: orderId,
         createdAt: dateString,
+        // Pesanan diikat ke akun pemesannya, supaya nanti hanya muncul pada
+        // pelacakan miliknya sendiri.
+        buyerAccountId: session?.accountId,
+        buyerName: session?.displayName ?? fullName,
         items: [...items],
         subtotalIDR,
         shippingCostIDR,
@@ -101,6 +113,47 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
       onCompleteCheckout(newOrder);
     }, 1200);
   };
+
+  /* Pembeli harus masuk sebelum memesan. Tanpa identitas, pesanan tidak bisa
+     dikaitkan kepada siapa pun: pembeli tidak dapat melacak miliknya sendiri,
+     dan pengrajin tidak tahu pesanan itu untuk siapa. Menjelajah dan menaruh
+     kain di keranjang tetap terbuka tanpa masuk. */
+  if (!session) {
+    return (
+      <main className="max-w-lg mx-auto px-4 pt-32 pb-24">
+        <div className="bg-white border border-[#767683]/20 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-5 bg-[#000666] text-white">
+            <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center mb-3">
+              <UserCircle2 className="w-5 h-5 text-[#ffe088]" />
+            </div>
+            <h1 className="font-serif-garamond text-2xl font-bold">Masuk untuk Memesan</h1>
+            <p className="text-xs text-white/80 mt-1.5 leading-relaxed">
+              Pesanan perlu terhubung ke sebuah akun supaya Anda bisa melacaknya, dan supaya
+              pengrajin tahu kepada siapa kainnya dikirim.
+            </p>
+          </div>
+          <div className="p-6 space-y-3">
+            <p className="text-xs text-[#454652] leading-relaxed">
+              Isi keranjang Anda tetap tersimpan. Anda hanya perlu masuk sekali, lalu kembali ke
+              halaman ini.
+            </p>
+            <button
+              onClick={onOpenAuth}
+              className="w-full py-3 bg-[#000666] text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#1a237e] transition-colors"
+            >
+              Masuk sebagai Pembeli
+            </button>
+            <button
+              onClick={() => onNavigateTab('cart')}
+              className="w-full py-3 border border-[#767683]/30 text-[#1b1c1a] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#efeeea] transition-colors"
+            >
+              Kembali ke Keranjang
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">

@@ -30,6 +30,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     quantity: 1,
     imageUrl: IMG['motif-truntum'],
     artisanName: 'Mpu Harjo',
+    artisanId: 'art-harjo',
     region: 'Surakarta / Solo',
   },
   {
@@ -42,6 +43,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     quantity: 1,
     imageUrl: IMG['motif-mega-mendung'],
     artisanName: 'Siti Rahmawati',
+    artisanId: 'art-trusmi',
     region: 'Cirebon',
   },
 ];
@@ -55,6 +57,10 @@ const CONTOH_PAJAK = Math.round(CONTOH_SUBTOTAL * 0.11);
 export const INITIAL_ORDER_SAMPLE: Order = {
   id: 'BTK-8829104',
   createdAt: '12 Agustus 2026 • 09.42 WIB',
+  // Pesanan contoh dimiliki akun pembeli peragaan, supaya penyaringan
+  // pesanan benar-benar teruji dan bukan sekadar lolos karena kosong.
+  buyerAccountId: 'akun-pembeli-1',
+  buyerName: 'Rani Kusuma',
   items: [
     {
       id: 'item-demo-1',
@@ -66,6 +72,7 @@ export const INITIAL_ORDER_SAMPLE: Order = {
       quantity: 1,
       imageUrl: IMG['item-demo-1'],
       artisanName: 'Mpu Harjo',
+    artisanId: 'art-harjo',
       region: 'Surakarta / Solo',
     },
   ],
