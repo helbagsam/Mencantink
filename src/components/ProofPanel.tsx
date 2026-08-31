@@ -22,7 +22,7 @@ import {
   ProofAsset,
   calculatePayout,
 } from '../domain/trust';
-import { getProductTrust, ProductTrustSummary } from '../services/trustService';
+import { useProductTrust } from '../hooks/useProductTrust';
 import { DEMO_DATA_NOTICE, IS_DEMO_DATA } from '../data/trustSeed';
 import { formatPrice } from '../utils/currency';
 import { Currency } from '../types';
@@ -58,25 +58,13 @@ export const ProofPanel: React.FC<ProofPanelProps> = (props) => {
   const { productId, priceIDR, isHeritageMotif = false, fallbackArtisanId } = props;
   const currency: Currency = props.currency ?? 'IDR';
 
-  const [trust, setTrust] = useState<ProductTrustSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { trust, loading } = useProductTrust(productId, fallbackArtisanId);
   const [activeAsset, setActiveAsset] = useState<ProofAsset | null>(null);
 
+  /* Berkas pertama dipilih otomatis begitu datanya tiba. */
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    getProductTrust(productId, fallbackArtisanId).then((result) => {
-      if (cancelled) return;
-      setTrust(result);
-      setActiveAsset(result.proofPack?.assets[0] ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [productId, fallbackArtisanId]);
+    setActiveAsset(trust?.proofPack?.assets[0] ?? null);
+  }, [trust]);
 
   if (loading) {
     return (

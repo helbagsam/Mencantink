@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { BatikMotif, Currency, NavTab } from '../types';
+import { getPurchasableProductIds } from '../services/trustService';
+import { formatPrice as formatPriceShared } from '../utils/currency';
 import { 
   Search, 
   Filter, 
@@ -39,13 +41,24 @@ export const PasarNusantaraView: React.FC<PasarNusantaraViewProps> = ({
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'artisan'>('newest');
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
 
-  const formatPrice = (priceInIDR: number) => {
-    if (currency === 'USD') {
-      const usd = Math.round(priceInIDR / 15500);
-      return `$${usd.toLocaleString()}`;
-    }
-    return `Rp ${priceInIDR.toLocaleString('id-ID')}`;
-  };
+  /* Kain tanpa bukti yang sudah ditinjau tidak dijual. Daftarnya diambil
+     sekali di sini, bukan per kartu, dan aturannya sama persis dengan yang
+     dipakai halaman detail. */
+  const [bolehDibeli, setBolehDibeli] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    let batal = false;
+    getPurchasableProductIds().then((ids) => {
+      if (!batal) setBolehDibeli(ids);
+    });
+    return () => {
+      batal = true;
+    };
+  }, [motifs]);
+
+  /* Memakai pemformat bersama. Sebelumnya halaman ini punya salinan sendiri
+     dengan kurs 15.500 sementara halaman lain memakai 15.600, sehingga kain
+     yang sama berbeda harga dolarnya tergantung halaman. */
+  const formatPrice = (priceInIDR: number) => formatPriceShared(priceInIDR, currency);
 
   const toggleTechnique = (tech: string) => {
     setSelectedTechniques((prev) =>
@@ -120,11 +133,15 @@ export const PasarNusantaraView: React.FC<PasarNusantaraViewProps> = ({
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div className="text-xs">
+            {/* Sebelumnya di sini tertulis "Garansi Batik Autentik 100%" —
+                jaminan mutlak yang tidak bisa dipertanggungjawabkan platform
+                (UU Perlindungan Konsumen No. 8 Tahun 1999) dan bertentangan
+                dengan keterangan di halaman produknya sendiri. */}
             <span className="font-bold text-[#ffe088] uppercase tracking-wider block">
-              Garansi Batik Autentik 100% Sertifikasi Pengrajin
+              Hanya kain berbukti yang dijual di sini
             </span>
             <p className="text-[#bdc2ff] opacity-90">
-              Setiap helai kain dilengkapi sertifikat keaslian perintang malam alami dari Komunitas Pengrajin Batik.
+              Kain yang buktinya belum ditinjau verifikator tetap ditampilkan, tetapi belum bisa dibeli. Buktinya dapat Anda periksa sendiri di halaman tiap kain.
             </p>
           </div>
         </div>
@@ -372,24 +389,41 @@ export const PasarNusantaraView: React.FC<PasarNusantaraViewProps> = ({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="p-5 pt-0 grid grid-cols-2 gap-2 mt-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAddToCart(motif);
-                        }}
-                        className="w-full border border-[#000666] text-[#000666] py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#000666]/5 transition-colors flex items-center justify-center gap-1"
-                      >
-                        <ShoppingCart className="w-3.5 h-3.5" />
-                        + Keranjang
-                      </button>
-                      <button
-                        onClick={(e) => handleBuyNow(motif, e)}
-                        className="w-full bg-[#a14000] text-white py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors shadow-xs"
-                      >
-                        Beli Sekarang
-                      </button>
-                    </div>
+                    {bolehDibeli.has(motif.id) ? (
+                      <div className="p-5 pt-0 grid grid-cols-2 gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddToCart(motif);
+                          }}
+                          className="w-full border border-[#000666] text-[#000666] py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#000666]/5 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                          + Keranjang
+                        </button>
+                        <button
+                          onClick={(e) => handleBuyNow(motif, e)}
+                          className="w-full bg-[#a14000] text-white py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors shadow-xs"
+                        >
+                          Beli Sekarang
+                        </button>
+                      </div>
+                    ) : (
+                      /* Belum ada bukti yang ditinjau, jadi belum dijual.
+                         Kainnya tetap ditampilkan supaya pembeli melihat
+                         bedanya, dan pengrajinnya tetap terlihat. */
+                      <div className="p-5 pt-0 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectMotifDetail(motif);
+                          }}
+                          className="w-full border border-dashed border-[#767683]/50 text-[#767683] py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:border-[#a14000] hover:text-[#a14000] transition-colors"
+                        >
+                          Bukti Belum Ditinjau — Lihat Detail
+                        </button>
+                      </div>
+                    )}
                   </article>
                 );
               })}
