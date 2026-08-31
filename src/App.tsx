@@ -34,6 +34,7 @@ import { CommunityView } from './views/CommunityView';
 import { HeritageView } from './views/HeritageView';
 import { ArtisansView } from './views/ArtisansView';
 import { ArtisanProfileView } from './views/ArtisanProfileView';
+import { VerificationQueueView } from './views/VerificationQueueView';
 
 /**
  * Jembatan dari penamaan tab lama ke alamat halaman.
@@ -400,6 +401,19 @@ export function App() {
                   onNavigateTab={goTab}
                   onAddProductToCatalog={handleAddProductToCatalog}
                 />
+              </RequireRole>
+            }
+          />
+
+          <Route
+            path={ROUTES.verification}
+            element={
+              <RequireRole
+                allow={['verifier']}
+                reason="Ruang tinjauan hanya untuk verifikator, karena di sinilah keputusan keaslian dibuat dan dicatat atas nama seseorang."
+                onOpenAuth={() => setIsAuthOpen(true)}
+              >
+                <VerificationQueueView />
               </RequireRole>
             }
           />

@@ -17,6 +17,7 @@ export const ROUTES = {
   heritage: '/warisan',
   community: '/komunitas',
   portal: '/portal',
+  verification: '/verifikasi',
   portalUpload: '/portal/unggah',
   cart: '/keranjang',
   checkout: '/checkout',
