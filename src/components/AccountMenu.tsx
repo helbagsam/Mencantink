@@ -57,13 +57,21 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onOpenAuth }) => {
 
   if (!session) {
     return (
-      <button
-        onClick={onOpenAuth}
-        className="flex items-center gap-1.5 border border-[#a14000] text-[#a14000] px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all shadow-sm whitespace-nowrap shrink-0"
-      >
-        <UserCircle2 className="w-4 h-4" />
-        <span className="hidden sm:inline">Masuk</span>
-      </button>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Link
+          to={ROUTES.login}
+          className="flex items-center gap-1.5 border border-[#a14000] text-[#a14000] px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-all shadow-sm whitespace-nowrap"
+        >
+          <UserCircle2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Masuk</span>
+        </Link>
+        <Link
+          to={ROUTES.register}
+          className="hidden md:inline-block bg-[#000666] text-white px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-[#1a237e] transition-all shadow-sm whitespace-nowrap"
+        >
+          Daftar
+        </Link>
+      </div>
     );
   }
 

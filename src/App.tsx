@@ -35,6 +35,8 @@ import { OnboardingView } from './views/OnboardingView';
 import { CommunityView } from './views/CommunityView';
 import { HeritageView } from './views/HeritageView';
 import { ArtisansView } from './views/ArtisansView';
+import { LoginView } from './views/LoginView';
+import { RegisterView } from './views/RegisterView';
 import { ArtisanProfileView } from './views/ArtisanProfileView';
 import { VerificationQueueView } from './views/VerificationQueueView';
 
@@ -440,6 +442,9 @@ export function App() {
               </RequireRole>
             }
           />
+
+          <Route path={ROUTES.login} element={<LoginView />} />
+          <Route path={ROUTES.register} element={<RegisterView />} />
 
           {/* Alamat tak dikenal dikembalikan ke beranda. */}
           <Route path="*" element={<HomeView onNavigateTab={goTab} />} />

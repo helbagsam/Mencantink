@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CartItem, Currency, NavTab, Order, OrderTimelineItem } from '../types';
 import { formatPrice, formatPriceSecondary } from '../utils/currency';
 import { Lock, ShieldCheck, Award, ArrowLeft, CheckCircle2, CreditCard, Landmark, QrCode, Smartphone, UserCircle2 } from 'lucide-react';
 import { useSession } from '../hooks/useSession';
+import { ROUTES } from '../routes';
 
 interface CheckoutViewProps {
   items: CartItem[];
@@ -143,6 +145,12 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
             >
               Masuk sebagai Pembeli
             </button>
+            <Link
+              to={ROUTES.register}
+              className="block w-full py-3 text-center border border-[#a14000] text-[#a14000] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#a14000] hover:text-white transition-colors"
+            >
+              Belum Punya Akun? Daftar
+            </Link>
             <button
               onClick={() => onNavigateTab('cart')}
               className="w-full py-3 border border-[#767683]/30 text-[#1b1c1a] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#efeeea] transition-colors"

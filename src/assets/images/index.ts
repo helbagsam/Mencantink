@@ -31,6 +31,7 @@ export const IMG = {
   'motif-kawung': new URL('./motif-kawung.png', import.meta.url).href,
   'motif-truntum': new URL('./motif-truntum.jpg', import.meta.url).href,
   'motif-tiga-negeri': new URL('./motif-tiga-negeri.webp', import.meta.url).href,
+  'logo-ruang-canting': new URL('./logo-ruang-canting.png', import.meta.url).href,
 } as const;
 
 export type ImgKey = keyof typeof IMG;

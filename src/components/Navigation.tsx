@@ -54,10 +54,10 @@ export const Navigation: React.FC<NavigationProps> = ({
           <BatikLogo size={38} className="group-hover:scale-105 transition-transform" />
           <div className="flex flex-col">
             <span className="font-serif-garamond text-base sm:text-lg md:text-xl font-bold text-[#000666] tracking-wide leading-none whitespace-nowrap">
-              BATIK NUSANTARA
+              RUANG CANTING
             </span>
             <span className="text-[8px] sm:text-[9px] font-sans tracking-widest text-[#a14000] uppercase font-bold mt-1 whitespace-nowrap">
-              Komunitas Pengrajin Batik Indonesia
+              Ruang Temu Pecinta Batik
             </span>
           </div>
         </Link>

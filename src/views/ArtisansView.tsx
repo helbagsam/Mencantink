@@ -167,7 +167,7 @@ export const ArtisansView: React.FC = () => {
       <div className="mt-10 space-y-2 border-t border-[#767683]/15 pt-5">
         <p className="text-[11px] text-[#454652] leading-relaxed flex gap-1.5">
           <Info className="w-3.5 h-3.5 text-[#a14000] shrink-0 mt-px" />
-          Batik Nusantara tidak menerbitkan sertifikat apa pun. Sertifikat kompetensi diterbitkan
+          Ruang Canting tidak menerbitkan sertifikat apa pun. Sertifikat kompetensi diterbitkan
           BNSP melalui LSP, dan Batikmark diterbitkan Kementerian Perindustrian. Yang kami lakukan
           adalah mencocokkan nomornya dan mendampingi pengrajin mengurusnya.
         </p>

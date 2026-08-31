@@ -16,6 +16,8 @@ export const ROUTES = {
   learn: '/belajar',
   heritage: '/warisan',
   community: '/komunitas',
+  login: '/masuk',
+  register: '/daftar',
   portal: '/portal',
   verification: '/verifikasi',
   portalUpload: '/portal/unggah',

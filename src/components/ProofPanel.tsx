@@ -393,7 +393,7 @@ export const ProofPanel: React.FC<ProofPanelProps> = (props) => {
         )}
         <p className="text-[10px] text-[#767683] leading-relaxed flex gap-1.5">
           <Info className="w-3.5 h-3.5 shrink-0 mt-px" />
-          Batik Nusantara tidak menyatakan jaminan keaslian. Yang ditampilkan adalah hasil
+          Ruang Canting tidak menyatakan jaminan keaslian. Yang ditampilkan adalah hasil
           pemeriksaan bukti oleh verifikator bernama pada tanggal tertentu, berikut dasar
           penilaiannya, supaya kamu bisa menilai sendiri.
         </p>

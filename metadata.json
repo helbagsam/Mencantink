@@ -1,5 +1,5 @@
 {
-  "name": "Komunitas Pengrajin Batik Nusantara",
+  "name": "Ruang Canting",
   "description": "Portal Komunitas, Katalog E-Commerce, Edukasi Warisan Batik Tulis/Cap/Kombinasi, dan Sistem Pembayaran Terintegrasi",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

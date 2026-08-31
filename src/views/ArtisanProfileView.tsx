@@ -278,13 +278,13 @@ export const ArtisanProfileView: React.FC = () => {
 
                         {cert.checkedByPlatformAt && (
                           <p className="text-[10px] text-[#767683] mt-2.5 pt-2.5 border-t border-[#767683]/15">
-                            Nomor ini dicocokkan oleh Batik Nusantara pada{' '}
+                            Nomor ini dicocokkan oleh Ruang Canting pada{' '}
                             {new Date(cert.checkedByPlatformAt).toLocaleDateString('id-ID', {
                               day: 'numeric',
                               month: 'long',
                               year: 'numeric',
                             })}
-                            . Batik Nusantara bukan penerbit sertifikat ini.
+                            . Ruang Canting bukan penerbit sertifikat ini.
                           </p>
                         )}
                       </div>
@@ -406,8 +406,8 @@ export const ArtisanProfileView: React.FC = () => {
                   <p className="text-[10px] text-[#454652] leading-relaxed flex gap-1.5">
                     <Info className="w-3.5 h-3.5 text-[#a14000] shrink-0 mt-px" />
                     Batikmark mensyaratkan merek terdaftar, NIB, NPWP, dan akta. Syarat ini menutup
-                    pintu bagi banyak pengrajin kecil yang keahliannya tidak diragukan. Batik
-                    Nusantara mendampingi pengurusannya, bukan menggantikan lembaganya.
+                    pintu bagi banyak pengrajin kecil yang keahliannya tidak diragukan. Ruang
+                    Canting mendampingi pengurusannya, bukan menggantikan lembaganya.
                   </p>
                 </div>
               </div>

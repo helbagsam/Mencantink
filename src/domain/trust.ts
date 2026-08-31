@@ -1,5 +1,5 @@
 /**
- * MODEL KEPERCAYAAN — inti produk Batik Nusantara.
+ * MODEL KEPERCAYAAN — inti produk Ruang Canting.
  *
  * Dua sertifikasi resmi yang sudah ada di Indonesia, ditambah satu tingkat
  * masuk yang bisa dicapai UMKM hanya dengan HP:
@@ -50,7 +50,7 @@ export const TRUST_TIERS: Record<TrustTier, TrustTierMeta> = {
     labelId: 'Terdaftar',
     labelEn: 'Registered',
     basisId: 'Identitas pengrajin sudah dicocokkan, bukti proses belum ditinjau.',
-    issuer: 'Batik Nusantara',
+    issuer: 'Ruang Canting',
     meaningId:
       'Pengrajin ini nyata dan identitasnya sudah dicocokkan, tetapi kainnya belum diperiksa verifikator. Periksa sendiri bukti prosesnya sebelum membeli.',
     accent: '#767683',
@@ -62,7 +62,7 @@ export const TRUST_TIERS: Record<TrustTier, TrustTierMeta> = {
     labelEn: 'Process Verified',
     basisId:
       'Foto tampak depan, tampak belakang, makro, remekan, dan video proses telah ditinjau verifikator manusia.',
-    issuer: 'Verifikator Batik Nusantara',
+    issuer: 'Verifikator Ruang Canting',
     meaningId:
       'Ada verifikator bernama yang sudah memeriksa bukti fisik kain ini dan menyatakan cirinya konsisten dengan teknik yang diklaim. Kamu bisa memeriksa buktinya sendiri di bawah.',
     accent: '#a14000',

@@ -17,11 +17,11 @@ export const Footer: React.FC<FooterProps> = ({ onTabChange }) => {
           <div className="flex items-center gap-3">
             <BatikLogo size={36} />
             <span className="font-serif-garamond text-xl md:text-2xl text-white font-bold tracking-tight">
-              KOMUNITAS PENGRAJIN BATIK NUSANTARA
+              RUANG CANTING
             </span>
           </div>
           <span className="text-xs text-[#bdc2ff] opacity-90 max-w-md">
-            © 2026 Komunitas Pengrajin Batik Nusantara. Melestarikan Warisan Budaya Indonesia Melalui Karya Autentik & Berdaya.
+            © 2026 Ruang Canting. Melestarikan Warisan Budaya Indonesia Melalui Karya Autentik & Berdaya.
           </span>
         </div>
 

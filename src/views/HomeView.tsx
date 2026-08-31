@@ -78,13 +78,13 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigateTab, onSelectEvent
             <div className="lg:col-span-7 space-y-7 text-center lg:text-left">
               <div className="inline-flex items-center gap-2.5 bg-[#a14000]/10 border border-[#a14000]/30 px-4 py-2 rounded-full text-[11px] font-bold text-[#a14000] uppercase tracking-widest shadow-sm">
                 <Sparkles className="w-4 h-4 text-[#a14000]" />
-                Wadah Resmi Pengrajin & Pelestari Batik Indonesia
+                Ruang Temu Pecinta Batik
               </div>
 
               <h1 className="font-serif-garamond text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.18] tracking-tight text-[#000666]">
-                KOMUNITAS PENGRAJIN <br />
+                RUANG{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a14000] via-[#c85a17] to-[#d97706]">
-                  BATIK NUSANTARA
+                  CANTING
                 </span>
               </h1>
 
@@ -194,7 +194,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigateTab, onSelectEvent
             Arah & Landasan Organisasi
           </span>
           <h2 className="font-serif-garamond text-3xl md:text-5xl font-bold text-[#000666] tracking-tight">
-            Visi & Misi Komunitas Pengrajin Batik Nusantara
+            Visi & Misi Ruang Canting
           </h2>
           <p className="text-sm md:text-base text-slate-600 leading-relaxed font-light">
             Menjadi wadah berdaya yang menaungi keberlanjutan para pembuat kain batik autentik, menjaga kesakralan warisan budaya UNESCO, serta meningkatkan taraf hidup pengrajin di seluruh penjuru tanah air.

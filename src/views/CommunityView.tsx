@@ -124,7 +124,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
             Ruang Diskusi & Sinergi Pengrajin
           </span>
           <h1 className="font-serif-garamond text-3xl sm:text-4xl font-bold text-[#000666]">
-            Komunitas & Event Batik Nusantara
+            Ruang Temu Pecinta Batik
           </h1>
           <p className="text-xs sm:text-sm text-[#454652] leading-relaxed">
             Wadah interaktif bagi pengrajin, kolektor, akademisi, dan pencinta batik untuk saling berbagi resep pewarnaan, tips sertifikasi, serta mengikuti agenda festival nasional.
