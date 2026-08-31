@@ -109,7 +109,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({
             {/* Philosophy Box */}
             <div className="bg-[#f5f3ef] border border-[#767683]/15 rounded-lg p-4 space-y-1">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#000666] flex items-center gap-1">
-                <BookOpen className="w-3.5 h-3.5 text-[#a14000]" /> Cultural Philosophy
+                <BookOpen className="w-3.5 h-3.5 text-[#a14000]" /> Filosofi Motif
               </h4>
               <p className="text-xs text-[#1b1c1a] italic leading-relaxed">
                 "{motif.philosophy}"
@@ -120,7 +120,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({
             {motif.originHistory && (
               <div className="space-y-1">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#767683] flex items-center gap-1">
-                  <Landmark className="w-3.5 h-3.5" /> Origin & Historical Record
+                  <Landmark className="w-3.5 h-3.5" /> Asal Usul & Catatan Sejarah
                 </h4>
                 <p className="text-xs text-[#454652]">
                   {motif.originHistory}
@@ -131,7 +131,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({
             {/* Estimated Price */}
             {motif.priceEstimate && (
               <div className="pt-2 border-t border-[#767683]/15 flex justify-between items-center text-xs">
-                <span className="text-[#767683] uppercase tracking-wider">Estimated Gallery Valuation:</span>
+                <span className="text-[#767683] uppercase tracking-wider">Perkiraan Nilai Galeri:</span>
                 <span className="font-bold text-[#000666] font-serif-garamond text-sm">{motif.priceEstimate}</span>
               </div>
             )}
@@ -140,7 +140,7 @@ export const MotifModal: React.FC<MotifModalProps> = ({
             {aiInsight && (
               <div className="bg-[#e0e0ff]/40 border border-[#000666]/20 rounded-lg p-3 text-xs text-[#000666] space-y-1">
                 <div className="font-bold flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#a14000]" /> AI Curator Analysis
+                  <Sparkles className="w-3.5 h-3.5 text-[#a14000]" /> Analisis Kurator AI
                 </div>
                 <p>{aiInsight}</p>
               </div>
@@ -157,12 +157,12 @@ export const MotifModal: React.FC<MotifModalProps> = ({
               {loadingAi ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Analyzing...
+                  Menganalisis...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5 text-[#ffe088]" />
-                  AI Analysis
+                  Analisis AI
                 </>
               )}
             </button>

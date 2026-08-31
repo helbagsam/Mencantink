@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { NavTab, ReviewItem, ForumThread, Order } from '../types';
 import { ARTISAN_AVATAR, MOCK_REVIEWS, MOCK_ARTICLES, MOCK_FORUM_THREADS } from '../data/mockData';
+import { Artisan, LadderProgress } from '../domain/artisan';
+import { TRUST_TIERS, isCertificateExpired } from '../domain/trust';
+import { getArtisanBySlug, getArtisanLadder } from '../services/trustService';
+import { TrustBadge } from '../components/TrustBadge';
+import { ROUTES } from '../routes';
+
 import { 
   LayoutDashboard, 
   Palette, 
@@ -18,6 +25,19 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+/**
+ * Pengrajin yang diperagakan sebagai pemilik portal.
+ *
+ * Sengaja dipilih Siti Rahmawati: keahliannya sudah diuji dan diakui negara,
+ * tetapi produknya tidak bisa memperoleh Batikmark semata-mata karena belum
+ * punya merek terdaftar. Dengan begitu portal pengrajin sendiri memperagakan
+ * masalah yang hendak dipecahkan produk ini.
+ *
+ * Nanti setelah ada autentikasi sungguhan, nilai ini diganti pengrajin yang
+ * sedang masuk.
+ */
+const DEMO_PORTAL_ARTISAN_SLUG = 'siti-rahmawati';
+
 interface DashboardViewProps {
   onNavigateTab: (tab: NavTab) => void;
   onOpenWriteReview: () => void;
@@ -34,6 +54,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [activeSideTab, setActiveSideTab] = useState<'overview' | 'portfolio' | 'certifications' | 'marketplace' | 'settings'>('overview');
   const [reviewsList, setReviewsList] = useState<ReviewItem[]>(MOCK_REVIEWS);
 
+  /* Status sertifikasi dibaca dari data pengrajin, bukan ditulis mati.
+     Versi sebelumnya memasang "Authenticity Score 98%", "Top 5%", dan
+     "MASTER ARTISAN LEVEL III" — tiga-tiganya jenjang karangan yang tidak ada
+     di sistem sertifikasi mana pun, dan tanggal perpanjangannya pun sudah
+     lewat menurut kalender aplikasi ini sendiri. */
+  const [portalArtisan, setPortalArtisan] = useState<Artisan | null>(null);
+  const [ladder, setLadder] = useState<LadderProgress | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const artisan = await getArtisanBySlug(DEMO_PORTAL_ARTISAN_SLUG);
+      if (cancelled || !artisan) return;
+      setPortalArtisan(artisan);
+      const l = await getArtisanLadder(artisan.id);
+      if (!cancelled) setLadder(l);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeCert = portalArtisan?.certificates.find((c) => !isCertificateExpired(c));
+
   return (
     <div className="w-full min-h-screen bg-[#fbf9f5] pt-20 flex flex-col lg:flex-row">
       {/* SideNavBar */}
@@ -42,17 +86,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-[#a14000] shadow-sm">
             <img 
-              src={ARTISAN_AVATAR} 
-              alt="Artisan Profile Image" 
+              src={portalArtisan?.avatarUrl ?? ARTISAN_AVATAR} 
+              alt="Foto profil pengrajin" 
               className="w-full h-full object-cover" 
             />
           </div>
           <h2 className="font-serif-garamond text-xl font-bold text-[#000666]">
-            Artisan Portal
+            {portalArtisan?.name ?? 'Portal Pengrajin'}
           </h2>
           <p className="text-xs font-semibold text-[#767683] tracking-widest uppercase mt-0.5 whitespace-nowrap">
-            Certified Craftsman
+            {portalArtisan?.workshop ?? 'Memuat...'}
           </p>
+          {portalArtisan && <TrustBadge tier={portalArtisan.tier} size="sm" className="mt-2" />}
         </div>
 
         {/* Navigation Links */}
@@ -66,7 +111,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }`}
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
-            <span>Overview</span>
+            <span>Ringkasan</span>
           </button>
 
           <button
@@ -77,7 +122,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="w-full flex items-center gap-3 px-4 py-3 text-[#454652] hover:bg-[#e4e2de] rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap"
           >
             <Palette className="w-4 h-4 shrink-0" />
-            <span>My Portfolio</span>
+            <span>Karya Saya</span>
           </button>
 
           <button
@@ -89,7 +134,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }`}
           >
             <BadgeCheck className="w-4 h-4 shrink-0" />
-            <span>Certifications</span>
+            <span>Sertifikasi</span>
           </button>
 
           <button
@@ -97,7 +142,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="w-full flex items-center gap-3 px-4 py-3 text-[#454652] hover:bg-[#e4e2de] rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap"
           >
             <Store className="w-4 h-4 shrink-0" />
-            <span>Marketplace</span>
+            <span>Pasar</span>
           </button>
 
           <button
@@ -109,7 +154,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             }`}
           >
             <Settings className="w-4 h-4 shrink-0" />
-            <span>Settings</span>
+            <span>Pengaturan</span>
           </button>
         </div>
 
@@ -120,7 +165,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="w-full py-3 bg-[#000666] text-white text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#1a237e] transition-colors border border-transparent flex items-center justify-center gap-2 whitespace-nowrap"
           >
             <Upload className="w-4 h-4 shrink-0" />
-            Upload New Work
+            Unggah Karya Baru
           </button>
         </div>
       </aside>
@@ -131,16 +176,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <header className="mb-10 flex flex-col md:flex-row justify-between md:items-end border-b border-[#767683]/15 pb-6 gap-4">
           <div>
             <h1 className="font-serif-garamond text-3xl md:text-4xl font-bold text-[#000666]">
-              Dashboard Overview
+              Ringkasan Portal
             </h1>
             <p className="text-sm text-[#454652] mt-1 max-w-2xl">
-              Welcome back. Here is a summary of your recent activities, market insights, and resources.
+              Selamat datang kembali. Berikut ringkasan aktivitas, status sertifikasi, dan pesanan yang masuk.
             </p>
           </div>
           <div className="flex items-center gap-2 self-start md:self-auto">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#eae8e4] rounded-full border border-[#767683]/15 text-xs font-bold text-[#454652] uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-[#a14000] animate-pulse" />
-              STATUS: ACTIVE
+              STATUS: AKTIF
             </span>
           </div>
         </header>
@@ -152,33 +197,83 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="batik-pattern-overlay absolute inset-0 opacity-40 mix-blend-multiply pointer-events-none" />
             <div className="relative z-10 flex justify-between items-start mb-6">
               <div>
-                <h3 className="font-serif-garamond text-2xl font-bold text-[#000666] mb-0.5">
-                  Certification Status
+                <h3 className="font-serif-garamond text-2xl font-bold text-[#000666] mb-1">
+                  Status Sertifikasi
                 </h3>
-                <p className="text-xs font-bold text-[#a14000] uppercase tracking-widest">
-                  MASTER ARTISAN LEVEL III
-                </p>
+                {portalArtisan ? (
+                  <>
+                    <TrustBadge tier={portalArtisan.tier} size="md" />
+                    <p className="text-[11px] text-[#454652] mt-1.5">
+                      Diakui oleh {TRUST_TIERS[portalArtisan.tier].issuer}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-[#767683]">Memuat...</p>
+                )}
               </div>
-              <BadgeCheck className="w-8 h-8 text-[#a14000]" />
+              <BadgeCheck className="w-8 h-8 text-[#a14000] shrink-0" />
             </div>
 
-            <div className="relative z-10 grid grid-cols-2 gap-6 mt-auto">
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-auto">
               <div>
                 <p className="text-xs text-[#454652] font-semibold uppercase tracking-wider mb-1">
-                  Authenticity Score
+                  Sertifikat Berlaku
                 </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-serif-garamond text-4xl font-bold text-[#000666]">98%</span>
-                  <span className="text-sm font-semibold text-[#a14000]">Top 5%</span>
-                </div>
+                {activeCert ? (
+                  <>
+                    <p className="font-serif-garamond text-xl font-bold text-[#000666] leading-snug">
+                      {activeCert.scheme ?? 'Sertifikat Kompetensi'}
+                    </p>
+                    <p className="text-[11px] text-[#454652] mt-0.5">
+                      {activeCert.legalBasis} · berlaku sampai{' '}
+                      {activeCert.expiresAt
+                        ? new Date(activeCert.expiresAt).toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })
+                        : 'tanpa batas waktu'}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-[#767683] leading-relaxed">
+                    Belum ada sertifikat resmi yang berlaku.
+                  </p>
+                )}
               </div>
+
               <div>
                 <p className="text-xs text-[#454652] font-semibold uppercase tracking-wider mb-1">
-                  Renewal Date
+                  Kemajuan Naik Tingkat
                 </p>
-                <p className="font-serif-garamond text-2xl font-bold text-[#1b1c1a]">
-                  Oct 15, 2024
-                </p>
+                {ladder ? (
+                  <>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-serif-garamond text-4xl font-bold text-[#000666]">
+                        {ladder.completedCount}
+                      </span>
+                      <span className="text-sm font-semibold text-[#a14000]">
+                        dari {ladder.totalCount} langkah
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#767683]/20 rounded-full mt-2 overflow-hidden max-w-[220px]">
+                      <div
+                        className="h-full bg-[#a14000]"
+                        style={{ width: `${(ladder.completedCount / ladder.totalCount) * 100}%` }}
+                      />
+                    </div>
+                    {portalArtisan && (
+                      <Link
+                        to={ROUTES.artisanProfile(portalArtisan.slug)}
+                        className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#a14000] hover:underline mt-2"
+                      >
+                        Lihat langkah yang tersisa
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-[#767683]">Memuat...</p>
+                )}
               </div>
             </div>
           </div>
@@ -191,9 +286,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="absolute inset-0 bg-[#1a237e] opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10 space-y-3">
               <PlusCircle className="w-12 h-12 mx-auto text-[#ffe088]" />
-              <h3 className="font-serif-garamond text-2xl font-bold">New Portfolio Entry</h3>
+              <h3 className="font-serif-garamond text-2xl font-bold">Unggah Karya Baru</h3>
               <p className="text-xs text-[#bdc2ff] leading-relaxed">
-                Upload your latest batik tulis creation for verification and marketplace listing.
+                Unggah kain terbaru Anda beserta paket buktinya untuk ditinjau verifikator sebelum tampil di pasar.
               </p>
             </div>
           </div>
@@ -206,7 +301,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   Fulfillment Hub / <span className="text-sm font-normal text-[#454652]">Pusat Pesanan E-Commerce</span>
                 </h3>
                 <p className="text-xs text-[#454652] mt-0.5">
-                  Track incoming artisan cloth purchases, verify payments, and update order dispatch status.
+                  Pantau pesanan yang masuk, periksa pembayaran, dan perbarui status pengiriman.
                 </p>
               </div>
               <button

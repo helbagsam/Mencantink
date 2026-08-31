@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavTab, EventItem } from '../types';
 import { MOCK_EVENTS, CANTING_WORKSHOP_IMG, INITIAL_MOTIFS } from '../data/mockData';
+import { getArtisans, getProofPacks } from '../services/trustService';
 import { 
   Sparkles, 
   BookOpen, 
@@ -26,7 +27,37 @@ interface HomeViewProps {
   onSelectEvent?: (event: EventItem) => void;
 }
 
+interface HomeStats {
+  artisans: number;
+  certified: number;
+  verifiedProducts: number;
+}
+
 export const HomeView: React.FC<HomeViewProps> = ({ onNavigateTab, onSelectEvent }) => {
+  /* Statistik beranda dihitung dari data sungguhan, bukan ditulis mati.
+     Kalau nanti ada seratus pengrajin, angkanya ikut naik sendiri — dan yang
+     lebih penting, angkanya tidak akan pernah mengklaim lebih dari yang ada. */
+  const [stats, setStats] = useState<HomeStats>({
+    artisans: 0,
+    certified: 0,
+    verifiedProducts: 0,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getArtisans(), getProofPacks()]).then(([artisans, packs]) => {
+      if (cancelled) return;
+      setStats({
+        artisans: artisans.length,
+        certified: artisans.filter((a) => a.certificates.length > 0).length,
+        verifiedProducts: packs.filter((p) => p.status === 'verified').length,
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="w-full bg-white text-slate-800 min-h-screen pt-28 pb-20">
       {/* 1. HERO BANNER - ELEGANT CLEAN LIGHT CONTAINER WITH TRANSLUCENT OVERLAY */}
@@ -58,7 +89,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigateTab, onSelectEvent
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl font-light tracking-wide">
-                Menjaga keaslian tradisi perintang malam, memperdayakan pengrajin lokal di 18 sentra daerah, dan menjembatani karya batik autentik berkualitas tinggi ke pasar nasional dan global.
+                Batik tulis kalah bersaing bukan karena mutunya, melainkan karena tidak punya cara membuktikan dirinya. Kami membuat bukti itu murah, sehingga pengrajin bisa menjual atas namanya sendiri.
               </p>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-3">
@@ -109,29 +140,49 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigateTab, onSelectEvent
 
       {/* 2. STATISTIK KOMUNITAS - CLEAN WHITE CARDS */}
       <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+        {/* Angka di sini dihitung dari data yang benar-benar ada di aplikasi.
+            Versi sebelumnya menuliskan "12.500+ pengrajin tersertifikasi",
+            "450+ motif", dan "100% perintang malam asli, bebas tekstil print"
+            — padahal isinya enam pengrajin dan enam motif. Yang terakhir bahkan
+            berupa jaminan keaslian, persis klaim yang dilarang UU Perlindungan
+            Konsumen No. 8 Tahun 1999 dan bertentangan dengan keterangan di
+            halaman produk sendiri. Angka nasional dipisahkan dan disebut
+            sumbernya, supaya tidak tertukar dengan capaian platform. */}
         <div className="bg-white rounded-3xl p-8 md:p-10 shadow-lg grid grid-cols-2 md:grid-cols-4 gap-8 text-center border border-slate-200 divide-y md:divide-y-0 md:divide-x divide-slate-100">
           <div className="space-y-2 pt-4 md:pt-0">
-            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#000666] tracking-tight">12.500+</p>
+            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#000666] tracking-tight">
+              {stats.artisans}
+            </p>
             <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Pengrajin Terdaftar</p>
-            <p className="text-[11px] text-slate-500 leading-normal">Tersertifikasi & Terverifikasi</p>
+            <p className="text-[11px] text-slate-500 leading-normal">
+              {stats.certified} bersertifikat resmi negara
+            </p>
           </div>
 
           <div className="space-y-2 pt-4 md:pt-0">
-            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#a14000] tracking-tight">450+</p>
-            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Motif Terkatalog</p>
-            <p className="text-[11px] text-slate-500 leading-normal">Lengkap Filosofi & Sejarah</p>
+            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#a14000] tracking-tight">
+              {stats.verifiedProducts}
+            </p>
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Kain Berbukti Proses</p>
+            <p className="text-[11px] text-slate-500 leading-normal">Sudah ditinjau verifikator bernama</p>
           </div>
 
           <div className="space-y-2 pt-4 md:pt-0">
-            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0284c7] tracking-tight">18</p>
-            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Sentra Batik Daerah</p>
-            <p className="text-[11px] text-slate-500 leading-normal">Jawa, Sumatra, Bali, Papua</p>
+            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0284c7] tracking-tight">2</p>
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Sertifikasi Negara</p>
+            <p className="text-[11px] text-slate-500 leading-normal">
+              Kompetensi BNSP &amp; Batikmark Kemenperin
+            </p>
           </div>
 
           <div className="space-y-2 pt-4 md:pt-0">
-            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#059669] tracking-tight">100%</p>
-            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Perintang Malam Asli</p>
-            <p className="text-[11px] text-slate-500 leading-normal">Bebas Tekstil Print Cetak</p>
+            <p className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#059669] tracking-tight">
+              ~6.000
+            </p>
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-widest">Unit Usaha Batik Nasional</p>
+            <p className="text-[11px] text-slate-500 leading-normal">
+              Di 11 provinsi — data Kemenperin, 2025
+            </p>
           </div>
         </div>
       </section>
