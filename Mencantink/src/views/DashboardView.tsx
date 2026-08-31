@@ -1,0 +1,473 @@
+import React, { useState } from 'react';
+import { NavTab, ReviewItem, ForumThread, Order } from '../types';
+import { ARTISAN_AVATAR, MOCK_REVIEWS, MOCK_ARTICLES, MOCK_FORUM_THREADS } from '../data/mockData';
+import { 
+  LayoutDashboard, 
+  Palette, 
+  BadgeCheck, 
+  Store, 
+  Settings, 
+  Upload, 
+  TrendingUp, 
+  BookOpen, 
+  MessageSquare, 
+  Star, 
+  Calendar, 
+  Building2, 
+  PlusCircle,
+  ExternalLink
+} from 'lucide-react';
+
+interface DashboardViewProps {
+  onNavigateTab: (tab: NavTab) => void;
+  onOpenWriteReview: () => void;
+  onOpenStartDiscussion: () => void;
+  orders?: Order[];
+}
+
+export const DashboardView: React.FC<DashboardViewProps> = ({
+  onNavigateTab,
+  onOpenWriteReview,
+  onOpenStartDiscussion,
+  orders = [],
+}) => {
+  const [activeSideTab, setActiveSideTab] = useState<'overview' | 'portfolio' | 'certifications' | 'marketplace' | 'settings'>('overview');
+  const [reviewsList, setReviewsList] = useState<ReviewItem[]>(MOCK_REVIEWS);
+
+  return (
+    <div className="w-full min-h-screen bg-[#fbf9f5] pt-20 flex flex-col lg:flex-row">
+      {/* SideNavBar */}
+      <aside className="w-full lg:w-64 bg-[#f5f3ef] border-b lg:border-b-0 lg:border-r border-[#767683]/15 lg:min-h-screen py-8 px-6 flex flex-col shrink-0">
+        {/* Profile Header */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-[#a14000] shadow-sm">
+            <img 
+              src={ARTISAN_AVATAR} 
+              alt="Artisan Profile Image" 
+              className="w-full h-full object-cover" 
+            />
+          </div>
+          <h2 className="font-serif-garamond text-xl font-bold text-[#000666]">
+            Artisan Portal
+          </h2>
+          <p className="text-xs font-semibold text-[#767683] tracking-widest uppercase mt-0.5 whitespace-nowrap">
+            Certified Craftsman
+          </p>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="flex-1 space-y-2">
+          <button
+            onClick={() => setActiveSideTab('overview')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+              activeSideTab === 'overview'
+                ? 'bg-[#1a237e] text-white shadow-sm'
+                : 'text-[#454652] hover:bg-[#e4e2de]'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
+            <span>Overview</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveSideTab('portfolio');
+              onNavigateTab('catalog');
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#454652] hover:bg-[#e4e2de] rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap"
+          >
+            <Palette className="w-4 h-4 shrink-0" />
+            <span>My Portfolio</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSideTab('certifications')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
+              activeSideTab === 'certifications'
+                ? 'bg-[#1a237e] text-white'
+                : 'text-[#454652] hover:bg-[#e4e2de]'
+            }`}
+          >
+            <BadgeCheck className="w-4 h-4 shrink-0" />
+            <span>Certifications</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab('onboarding')}
+            className="w-full flex items-center gap-3 px-4 py-3 text-[#454652] hover:bg-[#e4e2de] rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap"
+          >
+            <Store className="w-4 h-4 shrink-0" />
+            <span>Marketplace</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSideTab('settings')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
+              activeSideTab === 'settings'
+                ? 'bg-[#1a237e] text-white'
+                : 'text-[#454652] hover:bg-[#e4e2de]'
+            }`}
+          >
+            <Settings className="w-4 h-4 shrink-0" />
+            <span>Settings</span>
+          </button>
+        </div>
+
+        {/* Sidebar CTA */}
+        <div className="mt-8 pt-4 border-t border-[#767683]/15">
+          <button
+            onClick={() => onNavigateTab('onboarding')}
+            className="w-full py-3 bg-[#000666] text-white text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#1a237e] transition-colors border border-transparent flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <Upload className="w-4 h-4 shrink-0" />
+            Upload New Work
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto max-w-[1400px] mx-auto px-4 sm:px-8 xl:px-12 py-10">
+        {/* Header Bar */}
+        <header className="mb-10 flex flex-col md:flex-row justify-between md:items-end border-b border-[#767683]/15 pb-6 gap-4">
+          <div>
+            <h1 className="font-serif-garamond text-3xl md:text-4xl font-bold text-[#000666]">
+              Dashboard Overview
+            </h1>
+            <p className="text-sm text-[#454652] mt-1 max-w-2xl">
+              Welcome back. Here is a summary of your recent activities, market insights, and resources.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 self-start md:self-auto">
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#eae8e4] rounded-full border border-[#767683]/15 text-xs font-bold text-[#454652] uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-[#a14000] animate-pulse" />
+              STATUS: ACTIVE
+            </span>
+          </div>
+        </header>
+
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Card 1: Certification Status (Span 8) */}
+          <div className="col-span-1 md:col-span-8 bg-white rounded-xl border border-[#000666]/10 p-8 relative overflow-hidden flex flex-col justify-between min-h-[280px] shadow-sm">
+            <div className="batik-pattern-overlay absolute inset-0 opacity-40 mix-blend-multiply pointer-events-none" />
+            <div className="relative z-10 flex justify-between items-start mb-6">
+              <div>
+                <h3 className="font-serif-garamond text-2xl font-bold text-[#000666] mb-0.5">
+                  Certification Status
+                </h3>
+                <p className="text-xs font-bold text-[#a14000] uppercase tracking-widest">
+                  MASTER ARTISAN LEVEL III
+                </p>
+              </div>
+              <BadgeCheck className="w-8 h-8 text-[#a14000]" />
+            </div>
+
+            <div className="relative z-10 grid grid-cols-2 gap-6 mt-auto">
+              <div>
+                <p className="text-xs text-[#454652] font-semibold uppercase tracking-wider mb-1">
+                  Authenticity Score
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif-garamond text-4xl font-bold text-[#000666]">98%</span>
+                  <span className="text-sm font-semibold text-[#a14000]">Top 5%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-[#454652] font-semibold uppercase tracking-wider mb-1">
+                  Renewal Date
+                </p>
+                <p className="font-serif-garamond text-2xl font-bold text-[#1b1c1a]">
+                  Oct 15, 2024
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Quick Action Upload (Span 4) */}
+          <div 
+            onClick={() => onNavigateTab('onboarding')}
+            className="col-span-1 md:col-span-4 bg-[#000666] text-white rounded-xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden group cursor-pointer transition-transform hover:-translate-y-1 shadow-sm"
+          >
+            <div className="absolute inset-0 bg-[#1a237e] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10 space-y-3">
+              <PlusCircle className="w-12 h-12 mx-auto text-[#ffe088]" />
+              <h3 className="font-serif-garamond text-2xl font-bold">New Portfolio Entry</h3>
+              <p className="text-xs text-[#bdc2ff] leading-relaxed">
+                Upload your latest batik tulis creation for verification and marketplace listing.
+              </p>
+            </div>
+          </div>
+
+          {/* Fulfillment Hub / Active E-Commerce Orders (Span 12) */}
+          <div className="col-span-1 md:col-span-12 bg-white rounded-xl border border-[#000666]/10 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-[#767683]/15">
+              <div>
+                <h3 className="font-serif-garamond text-2xl font-bold text-[#000666]">
+                  Fulfillment Hub / <span className="text-sm font-normal text-[#454652]">Pusat Pesanan E-Commerce</span>
+                </h3>
+                <p className="text-xs text-[#454652] mt-0.5">
+                  Track incoming artisan cloth purchases, verify payments, and update order dispatch status.
+                </p>
+              </div>
+              <button
+                onClick={() => onNavigateTab('tracking')}
+                className="bg-[#a14000] text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#7b2f00] transition-colors"
+              >
+                Track Active Order
+              </button>
+            </div>
+
+            {orders.length === 0 ? (
+              <p className="text-xs text-[#767683] italic py-4">Belum ada pesanan e-commerce masuk. Lakukan checkout di katalog untuk menguji!</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#f5f3ef] text-[#000666] uppercase font-bold tracking-wider">
+                      <th className="p-3">Order ID</th>
+                      <th className="p-3">Buyer / Address</th>
+                      <th className="p-3">Items</th>
+                      <th className="p-3">Total Amount</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#767683]/10">
+                    {orders.map((ord) => (
+                      <tr key={ord.id} className="hover:bg-[#fbf9f5] transition-colors">
+                        <td className="p-3 font-mono font-bold text-[#000666]">{ord.id}</td>
+                        <td className="p-3">
+                          <p className="font-bold text-[#1b1c1a]">{ord.shippingAddress.fullName}</p>
+                          <p className="text-[11px] text-[#767683]">{ord.shippingAddress.city}</p>
+                        </td>
+                        <td className="p-3">
+                          <p className="font-medium text-[#1b1c1a]">
+                            {ord.items.map((i) => `${i.name} (${i.quantity}x)`).join(', ')}
+                          </p>
+                        </td>
+                        <td className="p-3 font-bold text-[#a14000]">
+                          Rp {ord.totalIDR.toLocaleString('id-ID')}
+                        </td>
+                        <td className="p-3">
+                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#ffe088]/40 text-[#735c00] border border-[#cba72f]/40">
+                            {ord.status}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <button
+                            onClick={() => onNavigateTab('tracking')}
+                            className="text-xs font-bold text-[#000666] hover:underline"
+                          >
+                            View Tracking
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Card 3: Market Insights (Span 6) */}
+          <div className="col-span-1 md:col-span-6 bg-white rounded-xl border border-[#000666]/10 p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-serif-garamond text-2xl font-bold text-[#000666]">
+                Market Insights
+              </h3>
+              <TrendingUp className="w-5 h-5 text-[#767683]" />
+            </div>
+            <ul className="space-y-4">
+              <li className="flex items-center justify-between pb-3 border-b border-[#cba72f]/20">
+                <div>
+                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Trending Motif</p>
+                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Megamendung Variations</p>
+                </div>
+                <span className="text-xs font-bold text-[#a14000]">+24% Demand</span>
+              </li>
+              <li className="flex items-center justify-between pb-3 border-b border-[#cba72f]/20">
+                <div>
+                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Buyer Interest</p>
+                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">Natural Indigo Dyes</p>
+                </div>
+                <span className="text-xs font-bold text-[#a14000]">High</span>
+              </li>
+              <li className="flex items-center justify-between pt-1">
+                <div>
+                  <p className="text-xs font-bold text-[#000666] uppercase tracking-wider">Avg. Gallery Price</p>
+                  <p className="font-serif-garamond text-xl font-semibold text-[#1b1c1a]">IDR 4.5M - 8M</p>
+                </div>
+                <button 
+                  onClick={() => onNavigateTab('catalog')}
+                  className="text-xs font-bold text-[#000666] underline hover:text-[#a14000] flex items-center gap-1"
+                >
+                  Full Report <ExternalLink className="w-3 h-3" />
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Card 4: Resources & Support (Span 6) */}
+          <div className="col-span-1 md:col-span-6 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-serif-garamond text-2xl font-bold text-[#000666]">
+                Resources & Support
+              </h3>
+              <BookOpen className="w-5 h-5 text-[#767683]" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+              <div 
+                onClick={() => onNavigateTab('community')}
+                className="border border-[#767683]/15 rounded-lg p-4 hover:border-[#a14000] transition-colors cursor-pointer group bg-[#fbf9f5]"
+              >
+                <Calendar className="w-5 h-5 text-[#a14000] mb-2" />
+                <h4 className="font-serif-garamond text-lg font-bold text-[#1b1c1a] group-hover:text-[#000666]">
+                  Natural Dye Workshop
+                </h4>
+                <p className="text-xs text-[#454652] mt-1">Next week • Virtual</p>
+              </div>
+              <div 
+                onClick={() => onNavigateTab('community')}
+                className="border border-[#767683]/15 rounded-lg p-4 hover:border-[#a14000] transition-colors cursor-pointer group bg-[#fbf9f5]"
+              >
+                <Building2 className="w-5 h-5 text-[#a14000] mb-2" />
+                <h4 className="font-serif-garamond text-lg font-bold text-[#1b1c1a] group-hover:text-[#000666]">
+                  Heritage Grant 2024
+                </h4>
+                <p className="text-xs text-[#454652] mt-1">Applications open</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Community & Insights Section Header */}
+        <div className="mt-14 mb-6 flex justify-between items-end border-b border-[#767683]/15 pb-4">
+          <h2 className="font-serif-garamond text-3xl font-bold text-[#000666]">
+            Community & Insights
+          </h2>
+          <button 
+            onClick={() => onNavigateTab('community')}
+            className="text-xs font-bold text-[#a14000] uppercase tracking-wider hover:underline"
+          >
+            View All
+          </button>
+        </div>
+
+        {/* Community 3-Column Bento Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Artisan Reviews (Span 4) */}
+          <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Artisan Reviews</h3>
+                <Star className="w-4 h-4 text-[#cba72f]" />
+              </div>
+              <div className="space-y-4">
+                {reviewsList.map((rev) => (
+                  <div key={rev.id} className="border-b border-[#767683]/10 pb-3 last:border-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-bold text-[#000666]">{rev.itemName}</p>
+                      <div className="flex text-[#cba72f] text-xs">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-3 h-3 ${i < Math.floor(rev.rating) ? 'fill-current' : ''}`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-[#1b1c1a] italic line-clamp-2">{rev.reviewText}</p>
+                    <p className="text-[11px] text-[#767683] mt-1">- {rev.reviewerName}, {rev.reviewerRole}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button 
+              onClick={onOpenWriteReview}
+              className="mt-6 w-full py-2 bg-[#efeeea] text-[#1b1c1a] text-xs font-bold uppercase tracking-wider rounded border border-[#767683]/20 hover:bg-[#e4e2de] transition-colors"
+            >
+              Write a Review
+            </button>
+          </div>
+
+          {/* Editorial Picks (Span 4) */}
+          <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Editorial Picks</h3>
+                <BookOpen className="w-4 h-4 text-[#767683]" />
+              </div>
+              <div className="space-y-4">
+                {MOCK_ARTICLES.map((art) => (
+                  <div 
+                    key={art.id} 
+                    onClick={() => onNavigateTab('heritage')}
+                    className="flex gap-3 group cursor-pointer"
+                  >
+                    <div className="w-16 h-16 rounded bg-[#e4e2de] shrink-0 overflow-hidden border border-[#767683]/10">
+                      <img 
+                        src={art.imageUrl} 
+                        alt={art.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <span className="text-[10px] font-bold text-[#a14000] uppercase tracking-wider mb-0.5">{art.category}</span>
+                      <h4 className="font-serif-garamond text-sm font-bold text-[#1b1c1a] group-hover:text-[#000666] line-clamp-2 leading-snug">
+                        {art.title}
+                      </h4>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button 
+              onClick={() => onNavigateTab('heritage')}
+              className="mt-6 w-full py-2 bg-[#efeeea] text-[#1b1c1a] text-xs font-bold uppercase tracking-wider rounded border border-[#767683]/20 hover:bg-[#e4e2de] transition-colors"
+            >
+              Read More Articles
+            </button>
+          </div>
+
+          {/* Member Discussion (Span 4) */}
+          <div className="col-span-1 lg:col-span-4 bg-white rounded-xl border border-[#000666]/10 p-6 flex flex-col justify-between shadow-sm">
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-serif-garamond text-xl font-bold text-[#000666]">Member Discussion</h3>
+                <MessageSquare className="w-4 h-4 text-[#767683]" />
+              </div>
+              <div className="space-y-3">
+                {MOCK_FORUM_THREADS.slice(0, 2).map((thread) => (
+                  <div 
+                    key={thread.id}
+                    onClick={() => onNavigateTab('community')}
+                    className="p-3 bg-[#f5f3ef] rounded-lg border border-[#767683]/10 hover:border-[#a14000] transition-colors cursor-pointer"
+                  >
+                    <h4 className="font-serif-garamond text-sm font-bold text-[#000666] line-clamp-1">
+                      {thread.title}
+                    </h4>
+                    <p className="text-xs text-[#454652] line-clamp-2 mt-1">
+                      {thread.content}
+                    </p>
+                    <div className="flex justify-between items-center text-[11px] text-[#767683] font-semibold mt-2">
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" /> {thread.repliesCount} replies
+                      </span>
+                      <span>Active {thread.timeAgo}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button 
+              onClick={() => onNavigateTab('community')}
+              className="mt-6 w-full py-2 bg-[#efeeea] text-[#1b1c1a] text-xs font-bold uppercase tracking-wider rounded border border-[#767683]/20 hover:bg-[#e4e2de] transition-colors"
+            >
+              Join the Forum
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
