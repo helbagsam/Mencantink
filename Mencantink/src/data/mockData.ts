@@ -1,10 +1,9 @@
 import { BatikMotif, ReviewItem, EditorialArticle, ForumThread, EventItem } from '../types';
+import { IMG } from '../assets/images';
 
-export const LOGO_URL = "https://lh3.googleusercontent.com/aida/AP1WRLutrcq0z3FVIMVEYDo6ANzBXQ5z2BZ7KeqluDDtKpZcJLY4t7YdL6ighqd729zemG41tDnHLdstQe1iMV5LZkb6tF8F06XyR9xDEwqx_pkjTaiSeLP4XbE2NATIXbeKt3YPIx8OJiSvtFSmMIEgKpAQRnATCwCqND6ld-x6SxdKq86U8pVy459Vk_UbWI38JsUGcT1l3niPcYH5-tPTD-9wBw82xyByHuN2UPNJ3s6gh3Qb5-f0v5vyb6Y";
+export const ARTISAN_AVATAR = IMG['artisan_avatar'];
 
-export const ARTISAN_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuC6GAZNx-92AGvmb5RF-2fC3Hqsre5AhVt_B88bMjkDziG2cemMFKUQ9wO_B7f2kzSmWx6tu9okfBEQFSPCTLprRLHSxMIga4e-qVt68jedfpkZNbwgdPoAqOVpx7uta6kXK5ttNKaG5VRmd-WQ-_uLnpkS120GloHY9vuSz0M3nSWMx5q6NUUkcALn1UMZrezFJVEQTPNAQXm7d_eTd4bLFc-dZnuNl8V_W2Bri-inNfrJQHBhvji-TA";
-
-export const CANTING_WORKSHOP_IMG = "https://lh3.googleusercontent.com/aida-public/AB6AXuAnoMuaApEiaZlq8IEsTw2uCxdqGIwYbJMnauYAIFvcEBgwNX2xY0h80ysPh7elfI2u4BvvJUyglU6FkMt6eWWw6uOSq7wd-qq9iGMBjlZlgVXYoJXLynGW3ce_4iHtSFXxHJS_3sj2vnTwDCjRzE9ad2z9mziy0flQg3DjtXrg1MTUKQYwSp1LmpquGjKdEvYOX6UQ5EotNHtLOp0OIVAY2JjJ0vicyKBQWK1w6F9YNXt-hhz-stWO0A";
+export const CANTING_WORKSHOP_IMG = IMG['canting_workshop_img'];
 
 export const INITIAL_MOTIFS: BatikMotif[] = [
   {
@@ -28,7 +27,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Medel & Nyolet: Pewarnaan dasar dengan celupan nilon soga keemasan dan nilon biru nira.',
       'Lorot: Pelarutan lilin malam panas dalam tungku air mendidih.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDX_y3oJ3HcJuocq2ScPpXDjTQoPYzshWHAkGhANRXCweUilKICt_MqYtxQyqX19YhPKyz0qk7o5OmCCAHCsmkZ9AvyHTzubCTXCor4TKy3B1iuAr-LVmz1u-BkYY7EZb76gS1vsnGT8cKTV_n-nuQGpKvuCp3yiOnBJSWprA2ke8jQ4xuivuZiUQXb7jwwqTMkitfKUtsbL4c2-uhm4f3P0qUS4WtSOLtGyKXzrHRvP3zpwe_fRO3cFQ',
+    imageUrl: IMG['parang-rusak'],
     tags: ['Warisan Keraton', 'Batik Tulis Halus', 'Pewarna Soga Alami']
   },
   {
@@ -49,7 +48,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga: Pencelupan berulang dalam ekstrak kayu tinggi & kulit kayu mahoni.',
       'Pelorotan: Penggodokan kain untuk melarutkan sarang malam.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcjBuoHj5JxcD5cVCnNj7SFVeTQghlfFsZTaHA3w0Kn0HEngK4wmznwQeOngXAGTiVqDRFGOrx6CPgbWf2gGjEq6U_cdm2rDs0kz256FBLbLJKcGJQyqkwCJPHhpOsEyymVBbX8IG3_8wgwM2dxuQ1EMJkcIL1O5C86QTqfE125BNH59CmlKzBVyqmyrSCV0FgdfcC5zZSns5wveTsl5e6AhIn-dQBdR0KmI8LjAm8Cpq7KwJBA0MuoQ',
+    imageUrl: IMG['kawung'],
     tags: ['Geometris Klasik', 'Pewarna Terracotta', 'Batik Cap']
   },
   {
@@ -70,7 +69,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Nyolet Gradasi: Kuasan tangan dengan pewarna indigo pekat bertahap dari tua ke muda.',
       'Fiksasi Tawas: Penguncian warna alami dengan tawas agar tahan puluhan tahun.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBJNv-CkG02wb__4R3TBFI9oJtL1Z0L58Bjjcb2evf3t0b2HxIsQNO8rNzplKW4QgoEksVBbWmE8g2epcnC-cQ8LTPwT2tteVv1mLfS9IflvPb7DIAb5h-4gbaWKK9ryLT3K53K-Rpg-UVwfJozUQIx-i_p-vcFZclaxX_pMDNfNbFUiILIE5MH7zW8mbVe4hlX4F-S_xh2M6f7ZnYeLdCZ07l2IwS6LN3R0GDoY6draTPT9HS-wWNxzg',
+    imageUrl: IMG['mega-mendung'],
     tags: ['Batik Pesisir', 'Nila Alami', 'Gradasi 7 Warna']
   },
   {
@@ -91,7 +90,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Isen-Isen Canting Tulis: Pengisian detail mikroskopis cecek dan flora menggunakan canting 0.5mm.',
       'Pewarnaan Ganda: Pencelupan warna soga khas Solo dan perintangan lorot bertahap.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD--gzP5SqSv7xTUMNQKqnyB8M1UkgoS-H3Uh6G5Wqz4T9ibWpu6KwUQPBSPkBK3aSG3BnLkeZTz_5o7yRzC-FaO8guUDs2egiPESt8qqszv1h3iEvzI-IDxcvSszcL2p_KDGgLz9hDjeirOqjy_v0gEvMgcS1Z_h2tixKzvWFvyjfMQkCEzap9dRJ30BkER9cWhYWrq0qDUEug8_69Gwtgbo0sDkHyG_bZESNJloE1WVsNakpcuoSLfg',
+    imageUrl: IMG['sekar-jagad'],
     tags: ['Mahakarya', 'Batik Kombinasi', 'Multimotif']
   },
   {
@@ -112,7 +111,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga Pekat: Perendaman dalam bak soga keraton.',
       'Lorot & Pengeringan Angin: Dikeringkan di bawah naungan pohon tanpa sinar matahari langsung.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBRlXRZERAHCO47gsX5LilXwnTIQ7t5Nm7VQJ7w-0pf6fBeBq6-QRVeeAbMODVw6Ri4e23HrWjWe2-Ko1SOLhcl8820Zn38eA23zDaQYUMWKHOKF00zI5zDJo7EqDWBmNyUuZR6Gfp1yVhsnoHWjEBohakD8XQVb2WdPJXF5T94kslg5Hh60cltQMjoIFYLzo26lZgZp7UxnCqw44MVKPO0WeWr3C1rKGiBAgJI15GZmRt-N7tT2FhwcQ',
+    imageUrl: IMG['truntum'],
     tags: ['Simbol Cinta', 'Tulis Canting', 'Solo Keraton']
   },
   {
@@ -133,7 +132,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pewarnaan Tahap 2 (Pekalongan): Canting tutup & celup nila biru.',
       'Pewarnaan Tahap 3 (Solo): Canting ulang & celup soga kayu mahoni.'
     ],
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnoMuaApEiaZlq8IEsTw2uCxdqGIwYbJMnauYAIFvcEBgwNX2xY0h80ysPh7elfI2u4BvvJUyglU6FkMt6eWWw6uOSq7wd-qq9iGMBjlZlgVXYoJXLynGW3ce_4iHtSFXxHJS_3sj2vnTwDCjRzE9ad2z9mziy0flQg3DjtXrg1MTUKQYwSp1LmpquGjKdEvYOX6UQ5EotNHtLOp0OIVAY2JjJ0vicyKBQWK1w6F9YNXt-hhz-stWO0A',
+    imageUrl: IMG['canting_workshop_img'],
     tags: ['Tiga Negeri', 'Koleksi Langka', 'Akulturasi Budaya']
   }
 ];
@@ -148,7 +147,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: 'Jakarta Convention Center (JCC), Hall A',
     organizer: 'Komunitas Pengrajin Batik Nusantara',
     description: 'Pameran akbar batik terbesar tahun ini! Menampilkan lebih dari 500 kain mahakarya koleksi langka dari pengrajin master Solo, Yogyakarta, Pekalongan, Cirebon, hingga Lasem.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnoMuaApEiaZlq8IEsTw2uCxdqGIwYbJMnauYAIFvcEBgwNX2xY0h80ysPh7elfI2u4BvvJUyglU6FkMt6eWWw6uOSq7wd-qq9iGMBjlZlgVXYoJXLynGW3ce_4iHtSFXxHJS_3sj2vnTwDCjRzE9ad2z9mziy0flQg3DjtXrg1MTUKQYwSp1LmpquGjKdEvYOX6UQ5EotNHtLOp0OIVAY2JjJ0vicyKBQWK1w6F9YNXt-hhz-stWO0A',
+    imageUrl: IMG['canting_workshop_img'],
     attendeesCount: 420,
     isRegistered: false
   },
@@ -161,7 +160,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: 'Solo Artisan Hub & Studio Canting, Surakarta',
     organizer: 'Sanggar Batik Bu Wahyu & Komunitas Batik',
     description: 'Pelatihan praktik langsung bersama Maestro Batik Solo. Peserta belajar meracik larutan pewarna daun Indigofera tinctoria dan memegang canting dengan benar.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB_WzzrF-5vFlVWTSm6Ov5X4bMFarAJSb0hTd21SCtULXZlka28O8KNlwBokGCK8CsRfddSGMrsZT9nDKUPByI6FSfeULtn7i9RhPl8FGT4rrtreZpzkLpoiQ5zmC9384D21J_Gm3NZhvw7MCDkcUd6EzgmGVaF-fhwhIjv3HSCi541H-IPz9RT4VMKjZXX86yeO1zOd2kfdIbIIfRJbDjNvIUi2Bwhw5WFSMMVBkJeB16VNGML_egyyA',
+    imageUrl: IMG['event-2'],
     attendeesCount: 85,
     isRegistered: true
   },
@@ -174,7 +173,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: 'Online via Zoom & YouTube Live',
     organizer: 'Tim Legal & Digital Komunitas Pengrajin Batik',
     description: 'Diskusi interaktif bersama pakar hukum Hak Kekayaan Intelektual (HKI) dan konsultan e-commerce tentang cara mendaftarkan hak cipta motif batik serta pemasaran global.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB-3vFXpqhGwtNV3YchBc1NpJZByc7PEnkF0ZK_NmhCg_yT3CofTfAVuzwLHixM78lKjjYvd4X7Se5J1d09ahLw9MAZktYg93MD0Yb0lt-S3Uw0LW3shcu7CCaTV2Spc-5HK_pkmBVeDyPSduhgvLAVIjhsJ5KeRb1_aazj6qG5a5XyyhqLdRHwdGvYplqE5Ds8IMQAHnvS-mEFJlPaWBUxt0SeenWoPHeboq1se1yuDasaQRSjXQZDw',
+    imageUrl: IMG['event-3'],
     attendeesCount: 310,
     isRegistered: false
   },
@@ -187,7 +186,7 @@ export const MOCK_EVENTS: EventItem[] = [
     location: 'Pekalongan Heritage Center & Online',
     organizer: 'Komunitas Pengrajin Batik Nusantara',
     description: 'Kompetisi kreasi motif baru bagi pengrajin muda dan desainer tekstil. Total hadiah Rp 50.000.000 beserta sertifikat lisensi nasional.',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB-ayvcFI_l8V7UeLJVoAJ5MeH_cj4ai64MqsMrG1JLmMNFQbDREJiON0xVvVlJGoX27_1kWU832YrlV2exS-CfFnQ7lyfqFdcjR-8GVaer2GWxU_dkfa10XMTu0SOmoEvNZywtwIHsNNuQQVQr4n4AlWx6q8iDBtAUNcSgBaFYQo72lKWYkAB5TF6Z7xjybNx0iPfeR2k1q2NgOxspRGZfHVxHnT5uJBz2z3IiwRjwk4rK04bovr46_A',
+    imageUrl: IMG['event-4'],
     attendeesCount: 195,
     isRegistered: false
   }
@@ -217,7 +216,7 @@ export const MOCK_ARTICLES: EditorialArticle[] = [
     id: 'a1',
     category: 'TEKNIK PEWARNAAN',
     title: 'Panduan Praktis Fermentasi Nila Alami Indigofera untuk Warna Biru Pekat',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBB-3vFXpqhGwtNV3YchBc1NpJZByc7PEnkF0ZK_NmhCg_yT3CofTfAVuzwLHixM78lKjjYvd4X7Se5J1d09ahLw9MAZktYg93MD0Yb0lt-S3Uw0LW3shcu7CCaTV2Spc-5HK_pkmBVeDyPSduhgvLAVIjhsJ5KeRb1_aazj6qG5a5XyyhqLdRHwdGvYplqE5Ds8IMQAHnvS-mEFJlPaWBUxt0SeenWoPHeboq1se1yuDasaQRSjXQZDw',
+    imageUrl: IMG['event-3'],
     readTime: '6 menit baca',
     summary: 'Proses fermentasi alami tanpa bahan kimia sintetis untuk menghasilkan warna biru indigo yang tahan lama.'
   },
@@ -225,7 +224,7 @@ export const MOCK_ARTICLES: EditorialArticle[] = [
     id: 'a2',
     category: 'FILOSOFI SEJARAH',
     title: 'Evolusi Motif Kawung: Dari Keraton Abad ke-13 Hingga Era Busana Modern',
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB-ayvcFI_l8V7UeLJVoAJ5MeH_cj4ai64MqsMrG1JLmMNFQbDREJiON0xVvVlJGoX27_1kWU832YrlV2exS-CfFnQ7lyfqFdcjR-8GVaer2GWxU_dkfa10XMTu0SOmoEvNZywtwIHsNNuQQVQr4n4AlWx6q8iDBtAUNcSgBaFYQo72lKWYkAB5TF6Z7xjybNx0iPfeR2k1q2NgOxspRGZfHVxHnT5uJBz2z3IiwRjwk4rK04bovr46_A',
+    imageUrl: IMG['event-4'],
     readTime: '8 menit baca',
     summary: 'Menelusuri perjalanan 800 tahun filosofi geometris empat arah angin yang melambangkan keadilan dan kesucian.'
   }
@@ -235,7 +234,7 @@ export const MOCK_FORUM_THREADS: ForumThread[] = [
   {
     id: 't1',
     authorName: 'Budi Santoso',
-    authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO51DnmqemYNYQmx9pzMzzsCGw2i6vWCIRK_J7JusGE-Rx_nszm2yK2O7cMRpCaEgSeMRPmGr0krEEF3c5ZhmkKpUwsgyZTyq1rod_0PsKurCkkKhLphAs6NR7QD1lmyoUCKzSh9EgK8C89vXiKPqbupsj98Y0xhXXR2Qs9hgcd7n9GYclM09nzg4qBN4jBLyYjnoJGU0GiV8VMHdaQAYiTq6-gbBPjNc5Kol_nod30GUCrUNoQ2uucw',
+    authorAvatar: IMG['t1'],
     timeAgo: '2 jam lalu',
     category: 'Teknik Pewarnaan Alami',
     title: 'Resep racikan fermentasi Indigofera agar hasil warna tidak mudah luntur',
@@ -246,7 +245,7 @@ export const MOCK_FORUM_THREADS: ForumThread[] = [
       {
         id: 'r1-1',
         authorName: 'Siti Rahma',
-        authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCji4KidvXNRZI4BbxqH5nAbxeVR-yCXSp2X2pY5klwGOZcJcL1tUGMOFqzA_tLYSok5gbyQ_uZ6iDAUNCftfSjPQSxYlTo1fGhHHJWA8MSbDcapDAW2sEg-AurPHfvmYbSKzLZiI2wD_fc1imiBVzCvfu_ykCOXyJj-r1ZgNBQCmdz_G9ydH91F7uKkjKDbnTh3Xh6DNNvNYFl6Hc2fijFdBcxR3g3ZjHhuiLiL9gVbllzBBCwBG10GQ',
+        authorAvatar: IMG['r1-1'],
         timeAgo: '1 jam lalu',
         content: 'Ibu bisa menambahkan sedikit tetes tebu atau sirup gula kelapa saat aktivasi tong warna, lalu lakukan proses fiksasi dengan larutan tawas secara lembut!'
       }
@@ -255,7 +254,7 @@ export const MOCK_FORUM_THREADS: ForumThread[] = [
   {
     id: 't2',
     authorName: 'Siti Rahma',
-    authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCji4KidvXNRZI4BbxqH5nAbxeVR-yCXSp2X2pY5klwGOZcJcL1tUGMOFqzA_tLYSok5gbyQ_uZ6iDAUNCftfSjPQSxYlTo1fGhHHJWA8MSbDcapDAW2sEg-AurPHfvmYbSKzLZiI2wD_fc1imiBVzCvfu_ykCOXyJj-r1ZgNBQCmdz_G9ydH91F7uKkjKDbnTh3Xh6DNNvNYFl6Hc2fijFdBcxR3g3ZjHhuiLiL9gVbllzBBCwBG10GQ',
+    authorAvatar: IMG['r1-1'],
     timeAgo: '5 jam lalu',
     category: 'Filosofi Motif',
     title: 'Pengembangan filosofi motif Truntum untuk busana kerja profesional',
@@ -266,7 +265,7 @@ export const MOCK_FORUM_THREADS: ForumThread[] = [
   {
     id: 't3',
     authorName: 'Suryo Handoko',
-    authorAvatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6GAZNx-92AGvmb5RF-2fC3Hqsre5AhVt_B88bMjkDziG2cemMFKUQ9wO_B7f2kzSmWx6tu9okfBEQFSPCTLprRLHSxMIga4e-qVt68jedfpkZNbwgdPoAqOVpx7uta6kXK5ttNKaG5VRmd-WQ-_uLnpkS120GloHY9vuSz0M3nSWMx5q6NUUkcALn1UMZrezFJVEQTPNAQXm7d_eTd4bLFc-dZnuNl8V_W2Bri-inNfrJQHBhvji-TA',
+    authorAvatar: IMG['artisan_avatar'],
     timeAgo: '1 hari lalu',
     category: 'Tips Sertifikasi',
     title: 'Panduan persiapan portofolio untuk audit Sertifikasi Pengrajin Master Level III',

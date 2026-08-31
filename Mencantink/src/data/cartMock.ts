@@ -1,4 +1,5 @@
 import { CartItem, Order } from '../types';
+import { IMG } from '../assets/images';
 
 export const INITIAL_CART_ITEMS: CartItem[] = [
   {
@@ -9,7 +10,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     fabricType: 'Premium Silk',
     priceIDR: 1250000,
     quantity: 1,
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAs8fOe-Y-qpYnkUZT-q0e3Y1Rg7JKffw6-_Q1nXZJdjgFiqUgKPINrtbLKqIxnl1j9ZGF9mkCYYQyo1SVwgU9ksHT14x8-fXxlRs-PEDumB_kpygaN3IyLbCHJKJHZW1VdEjN4E9mXsYsrY2Mqxptrrbjx13VCkKFps7KKASCy8ToyKWaNuGjSB_Elx51M6AoCJeWPdE_UGEtmmIP4SlEQppcQYelk467IrShQLwniAQbj2NQy2bn3fw',
+    imageUrl: IMG['cart-1'],
     artisanName: 'Ibu Siti Rohmah',
     region: 'Solo'
   },
@@ -21,7 +22,7 @@ export const INITIAL_CART_ITEMS: CartItem[] = [
     fabricType: 'Cotton Primissima',
     priceIDR: 650000,
     quantity: 1,
-    imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_Dkmeau9t5BUIE8VU-Pi7PoiCysi07pJe7OxQ1WkAgxLuomtVIEaOXyV6XiYWpN0lZ_9KlaqqtFOHPIQMTfVuqkTXloT9QKieXIEW-CGGrfuDJ9PtWa7OYkFSPNpVdoyNE7KXX6Z5bVZDjuFVOfqlYMtDxs3Myi3R_3EaBOzP0azwbHjNXMLJrqI-VArhvH8sRzhC4-ASxjwwcW8ZNeJjlLMi1jfsckF-fFudwjAUP6xdsyrdHmcWXQ',
+    imageUrl: IMG['cart-2'],
     artisanName: 'Pak Wijaya',
     region: 'Pekalongan'
   }
@@ -38,7 +39,7 @@ export const INITIAL_ORDER_SAMPLE: Order = {
       fabricType: 'Limited Edition Series',
       priceIDR: 1250000,
       quantity: 1,
-      imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC05gZsDpc1I5bKFYwySIHoPVfGWMYQLLKU6B05xZdMuRXGYL2PMD2Q5Nren_GPhW4XWC9bqrcCQ37lmg-iYDniiVlb6f0bXThICp53KPeThEH6Z_EmQhquHwYSdK9c4z72NbQbgcUe1Wzw7r156uO7h4bZvFyLHIT-fg_MogJbgSf6TUw-jxzhNSi2j7G8TdSh4FHpqxa40bTV6Dn1KiyH6c2ueH0IxcVSGrLmoxUpgCXBPxT0M62fyQ',
+      imageUrl: IMG['item-demo-1'],
       artisanName: 'Ibu Wahyu',
       region: 'Surakarta'
     }

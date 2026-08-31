@@ -2,6 +2,7 @@ import React from 'react';
 import { NavTab } from '../types';
 import { ARTISAN_AVATAR, CANTING_WORKSHOP_IMG } from '../data/mockData';
 import { MapPin, Award, CheckCircle2, ShieldCheck, Mail, Sparkles } from 'lucide-react';
+import { IMG } from '../assets/images';
 
 interface ArtisansViewProps {
   onNavigateTab: (tab: NavTab) => void;
@@ -28,7 +29,7 @@ export const ArtisansView: React.FC<ArtisansViewProps> = ({ onNavigateTab }) => 
       specialty: '7-Layer Natural Indigo Megamendung',
       level: 'Master Artisan Level II',
       score: '96% Authenticity',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCji4KidvXNRZI4BbxqH5nAbxeVR-yCXSp2X2pY5klwGOZcJcL1tUGMOFqzA_tLYSok5gbyQ_uZ6iDAUNCftfSjPQSxYlTo1fGhHHJWA8MSbDcapDAW2sEg-AurPHfvmYbSKzLZiI2wD_fc1imiBVzCvfu_ykCOXyJj-r1ZgNBQCmdz_G9ydH91F7uKkjKDbnTh3Xh6DNNvNYFl6Hc2fijFdBcxR3g3ZjHhuiLiL9gVbllzBBCwBG10GQ',
+      avatar: IMG['r1-1'],
       bio: 'Pioneer of organic fermentation vat dyeing in Cirebon, preserving coastal maritime trade motifs.',
     },
     {
@@ -39,7 +40,7 @@ export const ArtisansView: React.FC<ArtisansViewProps> = ({ onNavigateTab }) => 
       specialty: 'Geometric Cap & Copper Stamp Casting',
       level: 'Master Artisan Level III',
       score: '99% Authenticity',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCO51DnmqemYNYQmx9pzMzzsCGw2i6vWCIRK_J7JusGE-Rx_nszm2yK2O7cMRpCaEgSeMRPmGr0krEEF3c5ZhmkKpUwsgyZTyq1rod_0PsKurCkkKhLphAs6NR7QD1lmyoUCKzSh9EgK8C89vXiKPqbupsj98Y0xhXXR2Qs9hgcd7n9GYclM09nzg4qBN4jBLyYjnoJGU0GiV8VMHdaQAYiTq6-gbBPjNc5Kol_nod30GUCrUNoQ2uucw',
+      avatar: IMG['t1'],
       bio: 'Custom copper stamp maker and geometric batik preserver collaborating with global heritage museums.',
     },
   ];

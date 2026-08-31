@@ -11,6 +11,7 @@ import {
   Loader2,
   PackageCheck
 } from 'lucide-react';
+import { IMG } from '../assets/images';
 
 interface OnboardingViewProps {
   onNavigateTab: (tab: NavTab) => void;
@@ -93,7 +94,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
       description: description || 'Masterpiece created by certified master artisan.',
       philosophy: 'Continuous endurance, noble strength, and spiritual harmony.',
       originHistory: 'Hand-crafted during 2024 Artisan Workshop Residency.',
-      imageUrl: imagePreview || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDX_y3oJ3HcJuocq2ScPpXDjTQoPYzshWHAkGhANRXCweUilKICt_MqYtxQyqX19YhPKyz0qk7o5OmCCAHCsmkZ9AvyHTzubCTXCor4TKy3B1iuAr-LVmz1u-BkYY7EZb76gS1vsnGT8cKTV_n-nuQGpKvuCp3yiOnBJSWprA2ke8jQ4xuivuZiUQXb7jwwqTMkitfKUtsbL4c2-uhm4f3P0qUS4WtSOLtGyKXzrHRvP3zpwe_fRO3cFQ',
+      imageUrl: imagePreview || IMG['parang-rusak'],
       priceEstimate: `IDR ${price}`,
       tags: ['New Masterpiece', technique, region],
     };
