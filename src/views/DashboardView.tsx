@@ -4,7 +4,8 @@ import { NavTab, ReviewItem, ForumThread, Order } from '../types';
 import { ARTISAN_AVATAR, MOCK_REVIEWS, MOCK_ARTICLES, MOCK_FORUM_THREADS } from '../data/mockData';
 import { Artisan, LadderProgress } from '../domain/artisan';
 import { TRUST_TIERS, isCertificateExpired } from '../domain/trust';
-import { getArtisanBySlug, getArtisanLadder } from '../services/trustService';
+import { getArtisanById, getArtisanLadder } from '../services/trustService';
+import { useSession } from '../hooks/useSession';
 import { TrustBadge } from '../components/TrustBadge';
 import { ROUTES } from '../routes';
 
@@ -24,19 +25,6 @@ import {
   PlusCircle,
   ExternalLink
 } from 'lucide-react';
-
-/**
- * Pengrajin yang diperagakan sebagai pemilik portal.
- *
- * Sengaja dipilih Siti Rahmawati: keahliannya sudah diuji dan diakui negara,
- * tetapi produknya tidak bisa memperoleh Batikmark semata-mata karena belum
- * punya merek terdaftar. Dengan begitu portal pengrajin sendiri memperagakan
- * masalah yang hendak dipecahkan produk ini.
- *
- * Nanti setelah ada autentikasi sungguhan, nilai ini diganti pengrajin yang
- * sedang masuk.
- */
-const DEMO_PORTAL_ARTISAN_SLUG = 'siti-rahmawati';
 
 interface DashboardViewProps {
   onNavigateTab: (tab: NavTab) => void;
@@ -59,13 +47,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
      "MASTER ARTISAN LEVEL III" — tiga-tiganya jenjang karangan yang tidak ada
      di sistem sertifikasi mana pun, dan tanggal perpanjangannya pun sudah
      lewat menurut kalender aplikasi ini sendiri. */
+  const { session } = useSession();
   const [portalArtisan, setPortalArtisan] = useState<Artisan | null>(null);
   const [ladder, setLadder] = useState<LadderProgress | null>(null);
 
+  /* Portal menampilkan pengrajin yang sedang masuk. Sebelumnya slug-nya
+     ditulis mati di dalam berkas ini, sehingga portal selalu memperlihatkan
+     orang yang sama siapa pun yang membukanya. */
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const artisan = await getArtisanBySlug(DEMO_PORTAL_ARTISAN_SLUG);
+      if (!session?.artisanId) return;
+      const artisan = await getArtisanById(session.artisanId);
       if (cancelled || !artisan) return;
       setPortalArtisan(artisan);
       const l = await getArtisanLadder(artisan.id);
@@ -74,7 +67,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session?.artisanId]);
 
   const activeCert = portalArtisan?.certificates.find((c) => !isCertificateExpired(c));
 

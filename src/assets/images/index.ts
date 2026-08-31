@@ -27,6 +27,10 @@ export const IMG = {
   'cart-1': new URL('./cart-1.jpg', import.meta.url).href,
   'cart-2': new URL('./cart-2.jpg', import.meta.url).href,
   'item-demo-1': new URL('./item-demo-1.jpg', import.meta.url).href,
+  'motif-mega-mendung': new URL('./motif-mega-mendung.jpg', import.meta.url).href,
+  'motif-kawung': new URL('./motif-kawung.png', import.meta.url).href,
+  'motif-truntum': new URL('./motif-truntum.jpg', import.meta.url).href,
+  'motif-tiga-negeri': new URL('./motif-tiga-negeri.webp', import.meta.url).href,
 } as const;
 
 export type ImgKey = keyof typeof IMG;

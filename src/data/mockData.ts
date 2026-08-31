@@ -48,7 +48,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga: Pencelupan berulang dalam ekstrak kayu tinggi & kulit kayu mahoni.',
       'Pelorotan: Penggodokan kain untuk melarutkan sarang malam.'
     ],
-    imageUrl: IMG['kawung'],
+    imageUrl: IMG['motif-kawung'],
     tags: ['Geometris Klasik', 'Pewarna Terracotta', 'Batik Cap']
   },
   {
@@ -69,7 +69,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Nyolet Gradasi: Kuasan tangan dengan pewarna indigo pekat bertahap dari tua ke muda.',
       'Fiksasi Tawas: Penguncian warna alami dengan tawas agar tahan puluhan tahun.'
     ],
-    imageUrl: IMG['mega-mendung'],
+    imageUrl: IMG['motif-mega-mendung'],
     tags: ['Batik Pesisir', 'Nila Alami', 'Gradasi 7 Warna']
   },
   {
@@ -111,7 +111,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pencelupan Soga Pekat: Perendaman dalam bak soga keraton.',
       'Lorot & Pengeringan Angin: Dikeringkan di bawah naungan pohon tanpa sinar matahari langsung.'
     ],
-    imageUrl: IMG['truntum'],
+    imageUrl: IMG['motif-truntum'],
     tags: ['Simbol Cinta', 'Tulis Canting', 'Solo Keraton']
   },
   {
@@ -132,7 +132,7 @@ export const INITIAL_MOTIFS: BatikMotif[] = [
       'Pewarnaan Tahap 2 (Pekalongan): Canting tutup & celup nila biru.',
       'Pewarnaan Tahap 3 (Solo): Canting ulang & celup soga kayu mahoni.'
     ],
-    imageUrl: IMG['canting_workshop_img'],
+    imageUrl: IMG['motif-tiga-negeri'],
     tags: ['Tiga Negeri', 'Koleksi Langka', 'Akulturasi Budaya']
   }
 ];
