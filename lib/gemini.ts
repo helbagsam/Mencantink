@@ -1,14 +1,9 @@
-import { GoogleGenAI } from '@google/genai';
-
 /**
  * Bantuan menulis keterangan jualan.
  *
  * Dipakai bersama oleh server pengembangan (server.ts) dan fungsi tanpa server
  * di Vercel (api/gemini/generate-description.ts), supaya keduanya tidak pernah
- * berbeda perintah. Sebelumnya prompt di server masih menyuruh model menulis
- * "deskripsi warisan yang puitis dan filosofis", padahal antarmuka sudah
- * dinyatakan hanya menyusun kalimat jualan — servernya melakukan satu hal,
- * layarnya menjanjikan hal lain.
+ * berbeda perintah.
  *
  * BATAS YANG DISENGAJA: model TIDAK boleh mengarang filosofi motif, makna
  * simbol, atau asal-usul sejarah. Itu fakta budaya. Kalau model salah dan
@@ -16,12 +11,24 @@ import { GoogleGenAI } from '@google/genai';
  * menjadi seluruh alasan keberadaan platform ini. Model hanya merangkai
  * keterangan yang diberikan pengrajin sendiri menjadi kalimat yang enak dibaca.
  *
- * CATATAN PENGGELARAN: impor @google/genai sengaja ditulis statis di atas,
- * bukan dinamis di dalam fungsi. Penelusur berkas milik Vercel mengikuti impor
- * statis dengan andal; impor dinamis bisa terlewat, sehingga pustakanya tidak
- * ikut dipaket dan fungsinya baru gagal saat dipanggil — bukan saat dibangun,
- * jadi kegagalannya tidak terlihat di catatan build.
+ * ====================================================================
+ * KENAPA MEMANGGIL REST LANGSUNG, BUKAN MEMAKAI SDK
+ * ====================================================================
+ * Versi sebelumnya memakai paket @google/genai dan gagal di Vercel dengan
+ * FUNCTION_INVOCATION_FAILED. Fungsinya berhasil dibangun lalu jatuh saat
+ * dipanggil — yang jatuh adalah pemuatan pustakanya sendiri, sebelum satu baris
+ * pun kode kita sempat berjalan, sehingga kegagalannya tidak muncul di catatan
+ * build dan sulit dilacak.
+ *
+ * Panggilan REST dengan fetch bawaan Node menghapus seluruh kelas masalah itu:
+ * tidak ada yang perlu dipaket, tidak ada beda ESM dan CommonJS, dan
+ * perilakunya sama persis antara komputer sendiri dan Vercel. Untuk satu
+ * panggilan sederhana, SDK memang tidak memberi keuntungan apa pun.
+ * ====================================================================
  */
+
+const ENDPOINT =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 export interface DraftInput {
   motifName?: string;
@@ -55,16 +62,30 @@ Balas dengan JSON mentah tanpa blok markdown:
 }`;
 }
 
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string }> };
+  }>;
+  error?: { message?: string };
+}
+
 export async function generateListingDraft(
   input: DraftInput,
   apiKey: string,
 ): Promise<string> {
-  const ai = new GoogleGenAI({ apiKey });
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: buildListingPrompt(input),
+  const res = await fetch(`${ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: buildListingPrompt(input) }] }],
+    }),
   });
 
-  return response.text || '';
+  const data = (await res.json()) as GeminiResponse;
+
+  if (!res.ok) {
+    throw new Error(data.error?.message ?? `Layanan AI menjawab ${res.status}.`);
+  }
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 }
