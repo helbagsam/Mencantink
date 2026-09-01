@@ -32,8 +32,16 @@
  * menjadi seluruh alasan keberadaan platform ini.
  */
 
-const ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+/**
+ * Nama model bisa diganti lewat peubah lingkungan GEMINI_MODEL tanpa mengubah
+ * kode. Google sempat menghentikan gemini-2.5-flash bagi pengguna baru di
+ * tengah jalan, dan kejadian seperti itu tidak boleh membuat penggelaran
+ * tertahan menunggu perubahan kode — cukup ubah nilainya di pengaturan proyek
+ * lalu gelar ulang.
+ */
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+
+const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 /**
  * @typedef {object} DraftInput
