@@ -2,7 +2,9 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
-import { generateListingDraft } from './lib/gemini';
+// Mengimpor dari berkas fungsi Vercel itu sendiri, supaya perintah ke model
+// tidak pernah berbeda antara komputer sendiri dan produksi.
+import { generateListingDraft } from './api/gemini/generate-description.js';
 
 dotenv.config();
 
