@@ -1,77 +1,66 @@
-import express from "express";
-import path from "path";
-import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
+import express from 'express';
+import path from 'path';
+import { createServer as createViteServer } from 'vite';
+import dotenv from 'dotenv';
+import { generateListingDraft } from './lib/gemini';
 
 dotenv.config();
 
+/**
+ * Server untuk pengembangan di komputer sendiri.
+ *
+ * Di Vercel berkas ini tidak dipakai: di sana keluaran Vite disajikan sebagai
+ * berkas statis dan jalur /api ditangani fungsi tanpa server di folder api/.
+ * Keduanya memanggil lib/gemini.ts yang sama, supaya perintah ke model tidak
+ * pernah berbeda antara pengembangan dan produksi.
+ */
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '2mb' }));
 
-  // API route for AI Batik Heritage Description generator
-  app.post("/api/gemini/generate-description", async (req, res) => {
-    try {
-      const { motifName, technique, region, keywords } = req.body;
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        return res.status(400).json({ 
-          error: "GEMINI_API_KEY environment variable is not configured." 
-        });
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `You are a master curator of Indonesian Batik Heritage at Batik Nusantara.
-Write a culturally deep, poetic, and authentic heritage description for a batik piece.
-Details provided:
-- Motif Name: ${motifName || "Batik Tulis Piece"}
-- Craft Technique: ${technique || "Tulis"}
-- Region/Origin: ${region || "Java"}
-- Keywords/Notes: ${keywords || "Traditional natural wax-resist technique"}
-
-Return raw JSON only without markdown syntax block:
-{
-  "heritageDescription": "A 2-3 sentence philosophical description highlighting technique, symbolism, and cultural narrative.",
-  "suggestedPrice": "Estimated price range in IDR, e.g. Rp 2,500,000 - Rp 4,000,000",
-  "keyTags": ["tag1", "tag2", "tag3"]
-}`,
+  app.post('/api/gemini/generate-description', async (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({
+        error: 'GEMINI_API_KEY belum disetel di berkas .env.',
       });
+    }
 
-      const text = response.text || "";
+    try {
+      const { motifName, technique, region, keywords } = req.body ?? {};
+      const text = await generateListingDraft({ motifName, technique, region, keywords }, apiKey);
       res.json({ result: text });
-    } catch (err: any) {
-      console.error("Gemini API Error:", err);
-      res.status(500).json({ error: err.message || "Failed to generate AI response." });
+    } catch (err) {
+      const pesan = err instanceof Error ? err.message : 'Gagal menghubungi layanan AI.';
+      console.error('Gemini API Error:', pesan);
+      res.status(500).json({ error: pesan });
     }
   });
 
-  // Health endpoint
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", app: "Batik Nusantara" });
+  app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', app: 'Ruang Canting' });
   });
 
-  // Vite middleware for development vs static serve for production
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: "spa",
+      appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
+    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    // Semua alamat lain dikembalikan ke index.html supaya routing di sisi
+    // peramban tetap bekerja saat halaman dimuat ulang atau dibuka langsung.
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Batik Nusantara server running on http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Ruang Canting berjalan di http://localhost:${PORT}`);
   });
 }
 
