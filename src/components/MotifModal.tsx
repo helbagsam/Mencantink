@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BatikMotif, Currency } from '../types';
-import { X, Sparkles, MapPin, Tag, Landmark, Loader2, BookOpen } from 'lucide-react';
+import { X, MapPin, Tag, Landmark, BookOpen } from 'lucide-react';
 import { ProofPanel } from './ProofPanel';
 import { HERITAGE_MOTIF_IDS, PRODUCT_ARTISAN_MAP } from '../data/trustSeed';
 import { useProductTrust } from '../hooks/useProductTrust';
@@ -12,6 +12,27 @@ interface MotifModalProps {
   currency?: Currency;
 }
 
+/**
+ * Halaman detail kain.
+ *
+ * Di sini dulu ada tombol "Analisis AI" yang hasilnya ditampilkan sebagai
+ * "Analisis Kurator AI". Tombol itu dihapus, bukan diperbaiki namanya.
+ *
+ * Alasannya: halaman ini dilihat pembeli, dan penilaian atas kain di halaman
+ * ini sudah ada penanggung jawabnya — verifikator bernama dan bertanggal di
+ * panel Bukti Keaslian tepat di bawah. Menambahkan "analisis" karangan mesin
+ * di sebelahnya hanya mengaburkan siapa yang sebenarnya menilai, dan
+ * memberikan kesan pendapat ahli yang independen pada teks yang sama sekali
+ * bukan itu.
+ *
+ * Itu jenis kesalahan yang sama dengan lencana "98% Authenticity" dan
+ * "Garansi 100% Asli" yang sudah dibuang dari aplikasi ini: sesuatu yang
+ * belum terverifikasi didandani seolah-olah berwenang.
+ *
+ * Bantuan AI tetap ada, tetapi di tempat yang memang cocok — membantu
+ * pengrajin menyusun kalimat jualan dari kata kuncinya sendiri di borang
+ * unggah, bukan menilai kain di hadapan pembeli.
+ */
 export const MotifModal: React.FC<MotifModalProps> = ({
   motif,
   onClose,
@@ -19,43 +40,8 @@ export const MotifModal: React.FC<MotifModalProps> = ({
   currency = 'IDR',
 }) => {
   const { trust } = useProductTrust(motif?.id, motif ? PRODUCT_ARTISAN_MAP[motif.id] : undefined);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [loadingAi, setLoadingAi] = useState(false);
 
   if (!motif) return null;
-
-  const handleAskGemini = async () => {
-    setLoadingAi(true);
-    setAiInsight(null);
-    try {
-      const res = await fetch('/api/gemini/generate-description', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          motifName: motif.name,
-          technique: motif.technique,
-          region: motif.region,
-          keywords: `${motif.motifType}, ${motif.tags.join(', ')}`,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.result) {
-        try {
-          const parsed = JSON.parse(data.result);
-          setAiInsight(parsed.heritageDescription || data.result);
-        } catch {
-          setAiInsight(data.result);
-        }
-      } else {
-        setAiInsight('Unable to generate AI response. Please verify API key.');
-      }
-    } catch (err: any) {
-      setAiInsight('Error fetching curator insight.');
-    } finally {
-      setLoadingAi(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
@@ -138,36 +124,10 @@ export const MotifModal: React.FC<MotifModalProps> = ({
               </div>
             )}
 
-            {/* AI Curator Insights */}
-            {aiInsight && (
-              <div className="bg-[#e0e0ff]/40 border border-[#000666]/20 rounded-lg p-3 text-xs text-[#000666] space-y-1">
-                <div className="font-bold flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#a14000]" /> Analisis Kurator AI
-                </div>
-                <p>{aiInsight}</p>
-              </div>
-            )}
           </div>
 
           {/* Action buttons */}
           <div className="mt-6 pt-4 border-t border-[#767683]/15 flex flex-wrap gap-2">
-            <button
-              onClick={handleAskGemini}
-              disabled={loadingAi}
-              className="flex-1 py-2.5 px-3 bg-[#000666] text-white rounded-lg text-xs font-semibold uppercase tracking-wider hover:bg-[#1a237e] transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              {loadingAi ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Menganalisis...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-[#ffe088]" />
-                  Analisis AI
-                </>
-              )}
-            </button>
             {/* Kain tanpa bukti yang sudah ditinjau tidak dijual. Aturannya
                 dipusatkan di trustService supaya tombol ini dan panel bukti di
                 bawah mustahil berbeda pendapat. */}
