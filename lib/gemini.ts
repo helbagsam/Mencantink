@@ -1,3 +1,5 @@
+import { GoogleGenAI } from '@google/genai';
+
 /**
  * Bantuan menulis keterangan jualan.
  *
@@ -13,6 +15,12 @@
  * kelirunya tampil di halaman produk, yang rusak justru kredibilitas yang
  * menjadi seluruh alasan keberadaan platform ini. Model hanya merangkai
  * keterangan yang diberikan pengrajin sendiri menjadi kalimat yang enak dibaca.
+ *
+ * CATATAN PENGGELARAN: impor @google/genai sengaja ditulis statis di atas,
+ * bukan dinamis di dalam fungsi. Penelusur berkas milik Vercel mengikuti impor
+ * statis dengan andal; impor dinamis bisa terlewat, sehingga pustakanya tidak
+ * ikut dipaket dan fungsinya baru gagal saat dipanggil — bukan saat dibangun,
+ * jadi kegagalannya tidak terlihat di catatan build.
  */
 
 export interface DraftInput {
@@ -51,7 +59,6 @@ export async function generateListingDraft(
   input: DraftInput,
   apiKey: string,
 ): Promise<string> {
-  const { GoogleGenAI } = await import('@google/genai');
   const ai = new GoogleGenAI({ apiKey });
 
   const response = await ai.models.generateContent({
